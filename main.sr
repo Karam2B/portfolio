@@ -1,0 +1,19 @@
+[collection dated]
+data project (
+    title = string,
+    content = string(long),
+    summary = string,
+    github_link = external_link.optional,
+    live_link = external_link.optional,
+    display_picture = photo.optional,
+)
+
+[collection]
+data skill (title = string)
+
+many_to_many(project, skill)
+
+sub_project(terraform)
+sub_project(qwik)
+sub_project(admin)
+sub_project(rust)

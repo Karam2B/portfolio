@@ -67,9 +67,22 @@ provider "turso" {
   organization = "karam"
 }
 
-data "turso_database_token" "token" {
-  id = "portfolio"
-  authorization = "read-only"
+# this token will be updated every time I `terraform apply` which is unwanted behavior
+# data "turso_database_token" "token" {
+#   id = "portfolio"
+#   authorization = "read-only"
+# }
+
+variable "turso_token_full_access" {
+  description = "created by `turso db tokens create portfolio -e 7d`"
+  type        = string
+  sensitive   = true
+}
+
+variable "turso_token_read_only" {
+  description = "created by `turso db tokens create portfolio -e 7d --read-only`"
+  type        = string
+  sensitive   = true
 }
 
 variable "vercel_api_token" {
@@ -88,8 +101,6 @@ data "vercel_project" "frontend" {
   name = "portfolio"
 }
 
-
-
 resource "vercel_project_environment_variable" "turso_database_url" {
   project_id = data.vercel_project.frontend.id
   key        = "TURSO_DATABASE_URL"
@@ -100,10 +111,8 @@ resource "vercel_project_environment_variable" "turso_database_url" {
 resource "vercel_project_environment_variable" "turso_auth_token" {
   project_id = data.vercel_project.frontend.id
   key        = "TURSO_AUTH_TOKEN"
-  value      = data.turso_database_token.token.jwt # This will likely be a new token created for the project.
+  value      = var.turso_token_read_only
   target     = ["production", "preview", "development"]
-  # Mark the variable as sensitive so it's not shown in Terraform output
-  # sensitive = true
 }
 
 resource "vercel_project_environment_variable" "media_bucket_domain" {
@@ -111,6 +120,70 @@ resource "vercel_project_environment_variable" "media_bucket_domain" {
   key        = "PUBLIC_MEDIA_BUCKET_DOMAIN"
   value      = "https://${aws_s3_bucket.main_s3.bucket_domain_name}"  # This will likely be a new token created for the project.
   target     = ["production", "preview", "development"]
-  # Mark the variable as sensitive so it's not shown in Terraform output
-  # sensitive = true
+}
+
+data "vercel_project" "admin" {
+  name = "portfolio-admin"
+}
+
+resource "vercel_project_environment_variable" "turso_database_url_for_admin" {
+  project_id = data.vercel_project.admin.id
+  key        = "TURSO_DATABASE_URL"
+  value      = var.turso_database_url
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "turso_auth_token_for_admin" {
+  project_id = data.vercel_project.admin.id
+  key        = "TURSO_AUTH_TOKEN"
+  value      = var.turso_token_read_only
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "media_bucket_domain_for_admin" {
+  project_id = data.vercel_project.admin.id
+  key        = "PUBLIC_MEDIA_BUCKET_DOMAIN"
+  value      = "https://${aws_s3_bucket.main_s3.bucket_domain_name}"  # This will likely be a new token created for the project.
+  target     = ["production", "preview", "development"]
+}
+
+variable "admin_google_oauth_client_id" {
+  description = ""
+  type        = string
+  nullable    = false
+}
+
+variable "admin_google_oauth_client_secret" {
+  description = ""
+  type        = string
+  nullable    = false
+  sensitive   = true
+}
+
+resource "vercel_project_environment_variable" "google_oauth_client_id" {
+  project_id = data.vercel_project.admin.id
+  key        = "PUBLIC_GOOGLE_OAUTH_CLIENT_ID"
+  value      = var.admin_google_oauth_client_id
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "google_oauth_client_secret" {
+  project_id = data.vercel_project.admin.id
+  key        = "GOOGLE_OAUTH_CLIENT_SECRET"
+  value      = var.admin_google_oauth_client_secret
+  target     = ["production", "preview", "development"]
+}
+
+variable "admin_jwt_secret" {
+  description = ""
+  type        = string
+  nullable    = false
+  sensitive   = true
+}
+
+resource "vercel_project_environment_variable" "jwt_secret" {
+  project_id = data.vercel_project.admin.id
+  key        = "JWT_SECRET"
+  value      = var.admin_jwt_secret
+  target     = ["production", "preview", "development"]
 }

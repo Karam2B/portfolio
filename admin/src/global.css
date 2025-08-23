@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+a {
+    color: var(--color-blue-400);
+}
+
+input:focus-visible, textarea:focus-visible {
+    outline: none;
+}
+textarea {
+    height: 200px;
+}
+
+.ellipsis {
+  white-space: nowrap;       /* Prevents text from wrapping to the next line */
+  overflow: hidden;          /* Hides the overflowed text */
+  text-overflow: ellipsis;   /* Displays "..." for overflowed text */
+}

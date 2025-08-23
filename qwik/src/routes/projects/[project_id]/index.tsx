@@ -77,7 +77,7 @@ export default component$(() => {
                 </StyleA>
             )}
         </div>
-            <div dangerouslySetInnerHTML={project.value.value.content} />
+        <div dangerouslySetInnerHTML={project.value.value.content} />
     </div>
 })
 

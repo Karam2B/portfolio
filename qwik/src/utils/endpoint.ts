@@ -20,7 +20,8 @@ function v_parse<S extends v.GenericSchema>(schema: S, obj: unknown): v.InferOut
 export const project_schema = v.object({
     id: v.number(),
     title: v.string(),
-    content: v.string(), summary: v.string(),
+    content: v.string(),
+    summary: v.string(),
     github_link: v.nullable(v.string()),
     live_link: v.nullable(v.string()),
     created_at: v.string(),
@@ -95,10 +96,11 @@ export const server_one_project = server$(async function(id: number) {
     }
     console.log("fetched project of id: ", base.id);
 
-    base.content = sanitizeHtml(await marked.parse(base.content), {
-        allowedTags: ['b', 'i', 'em', 'strong', 'a'],
+    base.content = sanitizeHtml(await marked.use({ gfm: true, breaks: true }).parse(base.content), {
+        allowedTags: ['img', 'b', 'i', 'em', 'strong', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'hr', 'li', 'ol', 'p', 'pre', 'ul', 'br', 'em', 'i', 'kbd', 'caption', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr'],
         allowedAttributes: {
-            'a': ['href']
+            a: ['href', 'name', 'target'],
+            img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading']
         },
     })
 
@@ -108,7 +110,6 @@ export const server_one_project = server$(async function(id: number) {
 })
 
 export const use_one_project = (id: number) => {
-    const red = useNavigate();
     const signal = useSignal<Awaited<ReturnType<typeof server_one_project>>>()
     useTask$(async () => {
         const from_server = await server_one_project(id);
