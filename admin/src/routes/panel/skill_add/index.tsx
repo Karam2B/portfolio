@@ -1,14 +1,17 @@
 import { createClient } from "@libsql/client"
-import { $, component$, useComputed$, useSignal, useStylesScoped$, useVisibleTask$ } from "@builder.io/qwik";
+import { $, component$, useComputed$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
 import { routeLoader$, server$, useNavigate } from "@builder.io/qwik-city";
 import * as v from "valibot"
 import { InitialValues, SubmitHandler, reset, useForm, valiForm$ } from "@modular-forms/qwik"
+import { StringField } from "~/utils/input_elements";
+import { meta_schema, meta_set_schema } from "~/utils/on_update";
+import { required_string } from "~/utils/valibot_ext";
 
-const project_schema = v.object({
-    title: v.pipe(v.string("has tobe string"), v.nonEmpty("title cannot be null")),
+const entity_schema = v.object({
+    title: v.object({ meta: meta_set_schema, value: required_string })
 });
 
-export const server_submit = server$(async function(this, vals: v.InferOutput<typeof project_schema>) {
+export const server_submit = server$(async function(this, vals: v.InferOutput<typeof entity_schema>) {
     const authToken = this.env.get("TURSO_AUTH_TOKEN")
     const url = this.env.get("TURSO_DATABASE_URL")
 
@@ -18,31 +21,33 @@ export const server_submit = server$(async function(this, vals: v.InferOutput<ty
 
     const keys = [];
     const inserts = [];
-    const args = [];
+    const args: any[] = [];
 
     for (const key in vals) {
-        //@ts-ignore
-        const val = vals[key];
-        if (val === null) {
-            continue
+        const val = v.parse(
+            v.object({ meta: meta_schema, value: v.pipe(v.unknown(), v.check((e) => { return Boolean(e) })) }),
+            (vals as any)[key]
+        )
+
+        if (val.meta === "set_as") {
+            keys.push(key);
+            inserts.push("?");
+            args.push(val);
         }
-        keys.push(key);
-        inserts.push("?");
-        args.push(val);
     }
 
 
     const fetched = await client.execute({
-        sql: `INSERT INTO skill (title) VALUES (?) RETURNING id`,
-        args: [vals.title]
+        sql: `INSERT INTO skill (${keys.join(", ")}) VALUES (${inserts.join(", ")}) RETURNING id`,
+        args
     });
 
     return v.parse(v.pipe(v.array(v.object({ id: v.number() })), v.minLength(1)), fetched.rows as any)[0].id
 })
 
-export const use_form_loader = routeLoader$<InitialValues<v.InferInput<typeof project_schema>>>(() => {
+export const use_form_loader = routeLoader$<InitialValues<v.InferInput<typeof entity_schema>>>(() => {
     return {
-        title: "",
+        title: { meta: "set_as", value: "" },
     }
 });
 
@@ -52,31 +57,35 @@ export default component$(() => {
         console.log(JSON.stringify(res))
     }, { strategy: "document-ready" })
 
-    const [thisForm, { Form, Field }] = useForm<v.InferInput<typeof project_schema>>({
+    const [thisForm, { Form, Field }] = useForm<v.InferInput<typeof entity_schema>>({
         loader: use_form_loader(),
-        validate: valiForm$(project_schema),
+        validate: valiForm$(entity_schema),
     });
 
     const vals = useComputed$(() => {
         return Object.values(thisForm.internal.fields).map((e) => [e.name, e.value] as const)
     })
     const errors = useComputed$(() => {
-        return Object.values(thisForm.internal.fields).map((e) => e.error).filter((e) => e !== "")
+        return Object.values(thisForm.internal.fields).map((e) => ({ error: e.error, name: e.name })).filter((e) => e.error !== "")
     })
 
     const create_more = useSignal(true);
-    const status = useSignal(null as null | "loading" | number);
+    const status = useSignal("idle" as "idle" | "loading" | "error" | { result: number });
 
     const loc = useNavigate();
-    const submit = $<SubmitHandler<v.InferInput<typeof project_schema>>>(async (vals, evn) => {
+    const submit = $<SubmitHandler<v.InferInput<typeof entity_schema>>>(async (vals,) => {
         status.value = "loading";
-        const vals2 = v.parse(project_schema, vals);
-        const res = await server_submit(vals2);
-        status.value = res;
-        if (create_more.value) {
-            reset(thisForm)
-        } else {
-            loc(`/admin/skill/${res}`)
+        const vals2 = v.parse(entity_schema, vals);
+        try {
+            const res = await server_submit(vals2);
+            status.value = { result: res };
+            if (create_more.value) {
+                reset(thisForm)
+            } else {
+                loc(`/admin/skill/${res}`)
+            }
+        } catch {
+            status.value = "error"
         }
     })
 
@@ -84,19 +93,20 @@ export default component$(() => {
         <div class="flex gap-2"><span>Add Skill</span> </div>
         <Form onSubmit$={submit}>
             <div class="flex flex-col gap-2">
-                <Field name="title">
+                <Field name="title.value">
                     {(field, props) => (
-                        <div class="flex flex-col p-1 bg-slate-200">
-                            <span class="opacity-70 flex gap-2">
-                                <span>{props.name}</span>
-                                {field.error && <span class="text-red-400 ellipsis">{field.error}</span>}
-                            </span>
-                            <input {...props} type="string" value={field.value} />
-                        </div>
+                        <StringField
+                            field={field} props={props} store={thisForm}
+                            name="title"
+                            meta_action_set={{ set_as: { next: "set_as", disabled: false } }}
+                        />
                     )}
                 </Field>
                 <div class="!bg-white flex items-strech gap-1">
                     <div class="flex-1" />
+                    {status.value !== "idle" && <div style={{ background: status.value === "loading" ? "var(--color-yellow-400)" : status.value === "error" ? "var(--color-red-400)" : "var(--color-green-400)" }} class="p-1 px-3">
+                        {typeof status.value === "string" ? status.value : `success: ${status.value.result}`}
+                    </div>}
                     <div>
                         <div class="bg-slate-200 p-1 px-3 self-end cursor-pointer flex gap-1 items-center" onClick$={() => {
                             if (create_more.value) { create_more.value = false } else create_more.value = true
@@ -113,14 +123,10 @@ export default component$(() => {
                     })}
                 </div>}
 
-                {status.value !== null && <div class="flex gap-2 p-1">
-                    {typeof status.value === "number" && <span class="text-green-500">Success: {status.value}</span>}
-                    {status.value === "loading" && <span class="text-orange-500">loading</span>}
-                </div>}
                 {errors.value.length !== 0 &&
                     <div class="flex flex-col p-1">
                         <span>errors:</span>
-                        {errors.value.map((e) => <span>{e}</span>)}
+                        {errors.value.map((e) => <span>{e.name}: {e.error}</span>)}
                     </div>
                 }
             </div>

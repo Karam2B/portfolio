@@ -1,4 +1,4 @@
-import { component$, useComputed$, useSignal, useTask$ } from "@builder.io/qwik";
+import { component$, useComputed$, useSignal, useTask$, useVisibleTask$ } from "@builder.io/qwik";
 import { FormStore, getValue, setValue } from "@modular-forms/qwik";
 import * as v from "valibot"
 
@@ -31,7 +31,7 @@ export const StringField = component$((p: {
         return current_state_val.value.disabled
     })
     const display_meta = useComputed$(() => {
-        return Object.entries(p.meta_action_set).length >= 1
+        return Object.entries(p.meta_action_set).length > 1
     })
     return <div class="flex flex-col p-1 px-2 bg-slate-200 dark:bg-slate-700">
         <span class="opacity-70 flex gap-2">

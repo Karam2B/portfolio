@@ -5,10 +5,7 @@ import { routeLoader$, server$ } from "@builder.io/qwik-city";
 import { InitialValues, SubmitHandler, useForm, valiForm$ } from "@modular-forms/qwik"
 import { client } from "~/utils/client";
 import { DateField, PhotoField, StringField, TextareaField } from "~/utils/input_elements";
-
-const optional_string = v.nullable(v.pipe(v.string(), v.transform((e) => { if (e === "") { return null } else { return e } })))
-const required_string = v.pipe(v.string("has tobe string"), v.nonEmpty("cannot be null"))
-const date = v.pipe(v.string(), v.isoTimestamp())
+import { date, optional_string, required_string } from "~/utils/valibot_ext";
 
 const entity_schema = v.object({
     title: v.strictObject({ meta: meta_update_schema, value: required_string }),
@@ -24,9 +21,14 @@ const server_submit = server$(async function(this, vals: { id: number, entity: v
     const sets = [];
     const args: any[] = [];
 
-
     for (const key in vals.entity) {
-        const value = v.parse(v.object({ meta: v.string(), value: v.unknown() }), (vals.entity as any)[key]);
+        const value = v.parse(
+            v.object({
+                meta: v.string(),
+                value: v.pipe(v.unknown(), v.check((e) => { return Boolean(e) }))
+            }),
+            (vals.entity as any)[key]
+        );
         if (value.meta === "set_as") {
             sets.push(`${key} = ?`)
             args.push(value.value);
@@ -35,14 +37,13 @@ const server_submit = server$(async function(this, vals: { id: number, entity: v
         }
     }
     args.push(vals.id)
-    console.log(vals.entity, sets, args)
 
     const fetched = await client(this.env).execute({
         sql: `UPDATE project SET ${sets.join(", ")} WHERE id = ? RETURNING id`,
         args: [...args]
     })
-    // return v.parse(v.pipe(v.array(v.object({ id: v.number() })), v.minLength(1)), fetched.rows as any)[0].id
-    return vals.id
+    return v.parse(v.pipe(v.array(v.object({ id: v.number() })), v.minLength(1)), fetched.rows as any)[0].id
+    // return vals.id
 })
 
 export const use_id = routeLoader$(async (env) => {
@@ -73,7 +74,7 @@ export const use_form_loader = routeLoader$<InitialValues<v.InferInput<typeof en
             display_picture: return_schema_and_transform(entity_schema.entries.display_picture, "set_as"),
         })
         // entity_schema
-    ), v.minLength(1)), res.rows)[0] as any
+    ), v.minLength(1)), res.rows)[0]
 });
 
 export default component$(() => {

@@ -89,7 +89,7 @@ export default component$(() => {
                                 <span>{props.name}</span>
                                 {field.error && <span class="text-red-400 ellipsis">{field.error}</span>}
                             </span>
-                            <input {...props} type="string" value={field.value} />
+                            <input {...props} type="string" />
                         </div>
                     )}
                 </Field>
@@ -100,7 +100,7 @@ export default component$(() => {
                                 <span>{props.name}</span>
                                 {field.error && <span class="text-red-400 ellipsis">{field.error}</span>}
                             </span>
-                            <textarea {...props} value={field.value} />
+                            <textarea {...props} />
                         </div>
                     )}
                 </Field>
@@ -111,7 +111,7 @@ export default component$(() => {
                                 <span>{props.name}</span>
                                 {field.error && <span class="text-red-400 ellipsis">{field.error}</span>}
                             </span>
-                            <input {...props} type="string" value={field.value} />
+                            <input {...props} type="string" />
                         </div>
                     )}
                 </Field>
@@ -123,7 +123,7 @@ export default component$(() => {
                                 <span>{props.name}</span>
                                 {field.error && <span class="text-red-400 ellipsis">{field.error}</span>}
                             </span>
-                            <input {...props} type="string" value={field.value} />
+                            <input {...props} type="string" />
                         </div>
                     )}
                 </Field>
@@ -135,7 +135,7 @@ export default component$(() => {
                                 <span>{props.name}</span>
                                 {field.error && <span class="text-red-400 ellipsis">{field.error}</span>}
                             </span>
-                            <input {...props} type="string" value={field.value} />
+                            <input {...props} type="string" />
                         </div>
                     )}
                 </Field>
@@ -147,7 +147,7 @@ export default component$(() => {
                                 <span>{props.name}</span>
                                 {field.error && <span class="text-red-400 ellipsis">{field.error}</span>}
                             </span>
-                            <input {...props} type="string" value={field.value} />
+                            <input {...props} type="string" />
                         </div>
                     )}
                 </Field>
@@ -158,7 +158,7 @@ export default component$(() => {
                                 <span>{props.name}</span>
                                 {field.error && <span class="text-red-400 ellipsis">{field.error}</span>}
                             </span>
-                            <input {...props} type="string" value={field.value} />
+                            <input {...props} type="string" />
                         </div>
                     )}
                 </Field>

@@ -3,17 +3,22 @@ import { routeLoader$, server$ } from "@builder.io/qwik-city";
 import * as v from "valibot"
 import { InitialValues, SubmitHandler, useForm, valiForm$ } from "@modular-forms/qwik"
 import { client } from "~/utils/client";
+import { StringField } from "~/utils/input_elements";
+import { meta_update, meta_update_schema, return_schema_and_transform } from "~/utils/on_update";
+import { required_string } from "~/utils/valibot_ext";
 
-const project_schema = v.object({
-    title: v.pipe(v.string("has tobe string"), v.nonEmpty("title cannot be null")),
+const entity_schema = v.object({
+    title: v.strictObject({ meta: meta_update_schema, value: required_string }),
 });
 
-export const server_submit = server$(async function(this, vals: { project: v.InferOutput<typeof project_schema>, id: number }) {
-    const fetched = await client(this.env).execute({
-        sql: `UPDATE skill SET title = ? WHERE id = ? RETURNING id`,
-        args: [vals.project.title, vals.id]
-    });
-    return v.parse(v.pipe(v.array(v.object({ id: v.number() })), v.minLength(1)), fetched.rows as any)[0].id
+export const server_submit = server$(async function(this, vals: { project: v.InferOutput<typeof entity_schema>, id: number }) {
+    if (vals.project.title.meta === "set_as") {
+        const fetched = await client(this.env).execute({
+            sql: `UPDATE skill SET title = ? WHERE id = ? RETURNING id`,
+            args: [vals.project.title.value, vals.id]
+        });
+        return v.parse(v.pipe(v.array(v.object({ id: v.number() })), v.minLength(1)), fetched.rows as any)[0].id
+    } else { return vals.id }
 })
 
 export const use_id = routeLoader$(async (env) => {
@@ -22,7 +27,7 @@ export const use_id = routeLoader$(async (env) => {
         Array.from(env.query.entries())
     )[0][1];
 })
-export const use_form_loader = routeLoader$<InitialValues<v.InferInput<typeof project_schema>>>(async (
+export const use_form_loader = routeLoader$<InitialValues<v.InferInput<typeof entity_schema>>>(async (
     env
 ) => {
     const id = await env.resolveValue(use_id);
@@ -32,19 +37,18 @@ export const use_form_loader = routeLoader$<InitialValues<v.InferInput<typeof pr
         args: [id]
     });
 
-    return v.parse(v.pipe(v.array(project_schema), v.minLength(1)), res.rows)[0]
+    return v.parse(v.pipe(v.array(
+        v.object({
+            title: return_schema_and_transform(entity_schema.entries.title, "set_as")
+        })
+    ), v.minLength(1)), res.rows)[0]
 });
 
 export default component$(() => {
     const id = use_id();
-    useVisibleTask$(() => {
-        const res = v.parse(v.pipe(v.optional(v.string()), v.transform((e) => { if (e === "") { return null } else return e })), "");
-        console.log(JSON.stringify(res))
-    }, { strategy: "document-ready" })
-
-    const [thisForm, { Form, Field }] = useForm<v.InferInput<typeof project_schema>>({
+    const [thisForm, { Form, Field }] = useForm<v.InferInput<typeof entity_schema>>({
         loader: use_form_loader(),
-        validate: valiForm$(project_schema),
+        validate: valiForm$(entity_schema),
     });
 
     const vals = useComputed$(() => {
@@ -56,9 +60,9 @@ export default component$(() => {
 
     const status = useSignal(null as null | "loading" | number);
 
-    const submit = $<SubmitHandler<v.InferInput<typeof project_schema>>>(async (vals, evn) => {
+    const submit = $<SubmitHandler<v.InferInput<typeof entity_schema>>>(async (vals, evn) => {
         status.value = "loading";
-        const vals2 = v.parse(project_schema, vals);
+        const vals2 = v.parse(entity_schema, vals);
         const res = await server_submit({ project: vals2, id: id.value });
         status.value = res;
     })
@@ -67,15 +71,13 @@ export default component$(() => {
         <div class="flex gap-2"><span>Update Skill</span> </div>
         <Form onSubmit$={submit}>
             <div class="flex flex-col gap-2">
-                <Field name="title">
+                <Field name="title.value">
                     {(field, props) => (
-                        <div class="flex flex-col p-1 bg-slate-200">
-                            <span class="opacity-70 flex gap-2">
-                                <span>{props.name}</span>
-                                {field.error && <span class="text-red-400 ellipsis">{field.error}</span>}
-                            </span>
-                            <input {...props} type="string" value={field.value} />
-                        </div>
+                        <StringField
+                            field={field} props={props} store={thisForm}
+                            name="title"
+                            meta_action_set={meta_update}
+                        />
                     )}
                 </Field>
                 <div class="!bg-white flex items-strech gap-1">

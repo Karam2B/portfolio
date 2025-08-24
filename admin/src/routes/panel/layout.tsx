@@ -1,7 +1,7 @@
 import { Slot, component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
 import { server$ } from "@builder.io/qwik-city";
 import { object, parse, string } from "valibot";
-import jwt_lib from "jsonwebtoken"
+import * as jwt_lib from "jose"
 
 export const use_server = server$(function(this, jwt: string) {
     const env = parse(object({
@@ -11,7 +11,7 @@ export const use_server = server$(function(this, jwt: string) {
     });
 
     try {
-        jwt_lib.verify(jwt, env.JWT_SECRET);
+        jwt_lib.jwtVerify(jwt, new TextEncoder().encode(env.JWT_SECRET));
         return { success: true }
     } catch {
         return { success: false }

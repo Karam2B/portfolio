@@ -1,6 +1,6 @@
-import { component$, useVisibleTask$, useVisibleTaskQrl } from "@builder.io/qwik";
+import { component$, useSignal, useVisibleTask$, useVisibleTaskQrl } from "@builder.io/qwik";
 import { routeLoader$ } from "@builder.io/qwik-city";
-import jwt from "jsonwebtoken";
+import * as jwt from "jose";
 import * as v from "valibot"
 
 export const use_server = routeLoader$(async (req) => {
@@ -80,7 +80,7 @@ export const use_server = routeLoader$(async (req) => {
         if (source.email === "k99.barakat@gmail.com") {
             return {
                 stage: "stage_2" as const,
-                jwt_token: jwt.sign({}, env.JWT_SECRET)
+                jwt_token: await new jwt.SignJWT({}).setProtectedHeader({ alg: "HS256" }).sign(new TextEncoder().encode(env.JWT_SECRET))
             }
         } else {
             return { stage: "auth_error" as const }
@@ -93,6 +93,12 @@ export const use_server = routeLoader$(async (req) => {
 
 export default component$(() => {
     const server_data = use_server();
+    let redirect_uri = useSignal<string>();
+    useVisibleTask$(() => {
+        var url = new URL(import.meta.url);
+        const port = url.port !== "" ? ":" + url.port : "";
+        redirect_uri.value = url.protocol + "//" + url.hostname + port + "/auth/google";
+    }, { strategy: "document-ready" })
     useVisibleTask$((t) => {
         t.track(server_data)
         if (server_data.value.stage === "stage_2" && server_data.value.jwt_token) {
@@ -103,9 +109,9 @@ export default component$(() => {
 
     return <div class="grid place-content-center">
         {server_data.value.stage === "stage_1" ?
-            <a href={`https://accounts.google.com/o/oauth2/auth?${new URLSearchParams({
+            redirect_uri.value && <a href={`https://accounts.google.com/o/oauth2/auth?${new URLSearchParams({
                 response_type: "code",
-                redirect_uri: "http://localhost:5173/auth/google",
+                redirect_uri: redirect_uri.value,
                 scope: "https://www.googleapis.com/auth/userinfo.email",
                 client_id: import.meta.env.PUBLIC_GOOGLE_OAUTH_CLIENT_ID
             }).toString()
