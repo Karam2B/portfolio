@@ -6,7 +6,8 @@ import Github from "~/../public/github.svg?jsx"
 import Live from "~/../public/live.svg?jsx"
 import { DisplayImage, StyleA } from "./components";
 
-export const ProjectSummary = component$((props: { data: v.InferOutput<typeof project_schema> }) => {
+export const ProjectSummary = component$((props: { data: 
+Omit<v.InferOutput<typeof project_schema>, "content"> }) => {
     const _nav = useNavigate();
 
     return (

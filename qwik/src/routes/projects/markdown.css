@@ -1,0 +1,4 @@
+.markdown > * { margin-bottom: 0.5em }
+.markdown > h1 { font-size: var(--text-3xl); line-height: var(--tw-leading, var(--text-3xl--line-height)) } }
+.markdown > h2 { margin-bottom: 0.5em }
+.markdown > h3 { margin-bottom: 0.5em }

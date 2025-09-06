@@ -1,10 +1,11 @@
 import { useSignal, useTask$ } from "@builder.io/qwik"
-import { server$, useLocation, useNavigate } from "@builder.io/qwik-city"
+import { server$ } from "@builder.io/qwik-city"
 import { EnvGetter } from "@builder.io/qwik-city/middleware/request-handler";
 import { createClient } from "@libsql/client"
 import { marked } from "marked"
 import * as v from "valibot"
 import sanitizeHtml from "sanitize-html"
+import { all_custom_projects } from "~/routes/projects/(custom)/layout";
 
 function v_parse<S extends v.GenericSchema>(schema: S, obj: unknown): v.InferOutput<S> {
     let result_ = v.safeParse(schema, obj);
@@ -18,7 +19,7 @@ function v_parse<S extends v.GenericSchema>(schema: S, obj: unknown): v.InferOut
 }
 
 export const project_schema = v.object({
-    id: v.number(),
+    id: v.pipe(v.any(), v.transform((e) => String(e)), v.string(), v.nonEmpty()),
     title: v.string(),
     content: v.string(),
     summary: v.string(),
@@ -96,13 +97,19 @@ export const server_one_project = server$(async function(id: number) {
     }
     console.log("fetched project of id: ", base.id);
 
-    base.content = sanitizeHtml(await marked.use({ gfm: true, breaks: true }).parse(base.content), {
-        allowedTags: ['img', 'b', 'i', 'em', 'strong', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'hr', 'li', 'ol', 'p', 'pre', 'ul', 'br', 'em', 'i', 'kbd', 'caption', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr'],
-        allowedAttributes: {
-            a: ['href', 'name', 'target'],
-            img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading']
-        },
-    })
+
+    base.content = sanitizeHtml(
+        await marked
+            .use({ gfm: true, breaks: true })
+            .parse(base.content.replace(/\\n/g, "\n")),
+        {
+            allowedTags: ['img', 'b', 'i', 'em', 'strong', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'hr', 'li', 'ol', 'p', 'pre', 'ul', 'br', 'em', 'i', 'kbd', 'caption', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr'],
+            allowedAttributes: {
+                a: ['href', 'name', 'target'],
+                img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading']
+            },
+        }
+    )
 
     return {
         found: "some" as const, value: v_parse(project_schema, base)
@@ -132,7 +139,6 @@ const server_projects = server$(async function() {
         SELECT 
             p.id as p_id,
             p.title as p_title,
-            p.content as p_content,
             p.summary as p_summary,
             p.github_link as p_github_link,
             p.live_link as p_live_link,
@@ -147,19 +153,17 @@ const server_projects = server$(async function() {
         v.object({
             p_id: v.number(),
             p_title: v.string(),
-            p_content: v.string(),
             p_summary: v.string(),
             p_github_link: v.nullable(v.string()),
             p_live_link: v.nullable(v.string()),
             p_created_at: v.string(),
             p_display_picture: v.nullable(v.string()),
-
             s_id: v.optional(v.number()),
             s_title: v.optional(v.string()),// optional just like id
         })
     ), fetched.rows);
 
-    let result2 = new Map<number, v.InferOutput<typeof project_schema>>()
+    let result2 = new Map<number, {id: number} & Omit<v.InferOutput<typeof project_schema>, "id" | "content">>()
 
     for (const each of result) {
         let value = result2.get(each.p_id);
@@ -172,7 +176,6 @@ const server_projects = server$(async function() {
             result2.set(each.p_id, {
                 id: value.id,
                 title: value.title,
-                content: value.content,
                 summary: value.summary,
                 github_link: value.github_link,
                 live_link: value.live_link,
@@ -189,7 +192,6 @@ const server_projects = server$(async function() {
             result2.set(each.p_id, {
                 id: each.p_id,
                 title: each.p_title,
-                content: each.p_content,
                 summary: each.p_summary,
                 github_link: each.p_github_link,
                 live_link: each.p_live_link,
@@ -202,15 +204,25 @@ const server_projects = server$(async function() {
     }
     console.log("fetched project with count (may duplicate): ", fetched.rows.length);
 
-    return v_parse(v.array(project_schema), Array.from(result2.values()))
+    return v_parse(v.array(v.object({
+        id: v.pipe(v.any(), v.transform((e) => String(e)), v.string()),
+        title: project_schema.entries.title,
+        summary: project_schema.entries.summary,
+        github_link: project_schema.entries.github_link,
+        live_link: project_schema.entries.live_link,
+        created_at: project_schema.entries.created_at,
+        display_picture: project_schema.entries.display_picture,
+        skills: project_schema.entries.skills,
+    })), Array.from(result2.values()))
 })
 
 export const use_projects = () => {
     const signal = useSignal<Awaited<ReturnType<typeof server_projects>>>()
     useTask$(async () => {
         const from_server = await server_projects();
-
-        signal.value = from_server
+        signal.value = [
+            ...all_custom_projects.map((e) => { return { id: e.url_name, ...e.rest } }),
+            ...from_server]
     })
 
     return signal

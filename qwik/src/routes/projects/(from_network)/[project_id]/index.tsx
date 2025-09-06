@@ -1,4 +1,4 @@
-import { component$ } from "@builder.io/qwik";
+import { component$, useStylesScoped$ } from "@builder.io/qwik";
 import { all_projects_ids, use_one_project } from "~/utils/endpoint";
 import { StaticGenerateHandler, useLocation } from "@builder.io/qwik-city";
 import { DisplayImage, StyleA } from "~/utils/components";
@@ -8,7 +8,6 @@ import Live from "~/../public/live.svg?jsx";
 import { DateTime } from "luxon";
 
 export default component$(() => {
-
     const { params } = useLocation();
 
     const num = Number(params["project_id"]);
@@ -77,7 +76,7 @@ export default component$(() => {
                 </StyleA>
             )}
         </div>
-        <div dangerouslySetInnerHTML={project.value.value.content} />
+        <div class="markdown" dangerouslySetInnerHTML={project.value.value.content} />
     </div>
 })
 
