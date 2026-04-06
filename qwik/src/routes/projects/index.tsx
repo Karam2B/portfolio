@@ -1,10 +1,14 @@
 import { component$ } from "@builder.io/qwik";
 import { MainGrid, StyleA } from "~/utils/components";
-import { use_projects } from "~/utils/endpoint";
 import { ProjectSummary } from "~/utils/endpoint_view";
 import { Illigal } from "~/utils/illegal";
 import { MoArrowLeft } from "@qwikest/icons/monoicons";
-import { Link } from "@builder.io/qwik-city";
+import { Link, routeLoader$ } from "@builder.io/qwik-city";
+import { use_server_projects_2 } from "~/utils/endpoint_2";
+
+export const use_projects = routeLoader$(async (event) => {
+    return await use_server_projects_2(event);
+})
 
 export default component$(() => {
     const projects = use_projects();
@@ -23,9 +27,9 @@ export default component$(() => {
         </div>
         <MainGrid>
             {
-                projects.value ? projects.value.map((p) => {
+                projects.value.map((p) => {
                     return <ProjectSummary key={p.id} data={p} />
-                }) : <Illigal />
+                })
             }
         </MainGrid>
     </div >

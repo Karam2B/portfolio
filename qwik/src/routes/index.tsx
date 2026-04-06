@@ -1,13 +1,13 @@
 import { $, Slot, component$, useOnWindow, useSignal, useStylesScoped$ } from "@builder.io/qwik";
 import ScrollIcon from "~/../public/scroll.svg?jsx";
-import type { DocumentHead } from "@builder.io/qwik-city";
-import { use_projects } from "~/utils/endpoint";
+import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
 import { MainGrid, Separator, StyleA } from "~/utils/components"
 import { LinkAsA } from "./link/[link]";
 import { ProjectSummary } from "~/utils/endpoint_view";
 import { links } from "~/utils/links";
 import { Flare } from "~/utils/Flare";
 import { Illigal } from "~/utils/illegal";
+import { use_server_projects_2 } from "~/utils/endpoint_2";
 
 export default component$(() => {
     return (
@@ -266,6 +266,10 @@ const AnimatedLine = component$(() => {
     );
 });
 
+export const use_projects = routeLoader$(async (event) => {
+    return await use_server_projects_2(event);
+})
+
 const Projects = component$(() => {
     const projects = use_projects();
     return <div>
@@ -277,11 +281,11 @@ const Projects = component$(() => {
         <div class="my-5">
             <MainGrid>
                 {
-                    projects.value ? projects.value.map((pro) => {
-                        if (pro.display_picture) {
+                    projects.value.map((pro) => {
+                        if (pro.display_on_home) {
                             return <ProjectSummary key={pro.id} data={pro} />;
                         }
-                    }) : <Illigal />
+                    })
                 }
             </MainGrid>
             <div class="pt-7 grid place-content-center"><StyleA><a class="text-2xl" href="/projects" >See All</a></StyleA> </div>
@@ -289,8 +293,6 @@ const Projects = component$(() => {
 
     </div>
 })
-
-
 
 const ContactMe = component$(() => {
     return <div >

@@ -5,7 +5,7 @@ import { TbMailFilled } from "@qwikest/icons/tablericons";
 export const links = [
     {
         text: "Email" as const,
-        href: "mailto:hi@karam.page",
+        href: "mailto:kb.karam.barakat@gmail.com",
         Img: TbMailFilled,
     },
     {
@@ -14,7 +14,7 @@ export const links = [
     },
     {
         text: "Github" as const,
-        href: "https://github.com/karambarakat/myportfolio",
+        href: "https://github.com/Karam2B/",
         Img: BsGithub,
     },
     {
@@ -24,7 +24,7 @@ export const links = [
     },
     {
         text: "LinkedIn" as const,
-        href: "https://www.linkedin.com/in/kenn-barakat-775931262/",
+        href: "https://www.linkedin.com/in/karam-barakat-775931262/",
         Img: BsLinkedin,
     },
 ];

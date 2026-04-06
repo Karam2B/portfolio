@@ -1,13 +1,15 @@
-import { QwikCityProvider, RouterOutlet } from "@builder.io/qwik-city";
+import { DocumentHead, QwikCityProvider, RouterOutlet } from "@builder.io/qwik-city";
 import { RouterHead } from "./utils/router_head";
 import "./utils/global.css";
 import { component$, isDev } from "@builder.io/qwik";
 import { Base } from "./utils/components";
 
+
 export default component$(() => {
     return (
         <QwikCityProvider>
             <head>
+                <title>Karam's Portfolio</title>
                 <meta charset="utf-8" />
                 {!isDev && (
                     <link
@@ -27,3 +29,13 @@ export default component$(() => {
         </QwikCityProvider>
     );
 });
+
+export const head: DocumentHead = {
+    title: "Karam's Portfolio",
+    meta: [
+        { name: "description", content: "Karam's Portfolio" },
+    ],
+    links: [
+        { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+    ]
+}

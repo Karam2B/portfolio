@@ -1,20 +1,22 @@
 import { component$ } from "@builder.io/qwik"
 import * as  v from "valibot"
-import { project_schema } from "./endpoint"
+import { project_schema } from "./endpoint_2"
 import { Link, useNavigate } from "@builder.io/qwik-city";
 import Github from "~/../public/github.svg?jsx"
 import Live from "~/../public/live.svg?jsx"
 import { DisplayImage, StyleA } from "./components";
 
-export const ProjectSummary = component$((props: { data: 
-Omit<v.InferOutput<typeof project_schema>, "content"> }) => {
+export const ProjectSummary = component$((props: {
+    data:
+    Omit<v.InferOutput<typeof project_schema>, "content">
+}) => {
     const _nav = useNavigate();
 
     return (
         <div>
             <div
                 role="link"
-                class=" rounded-lg shadow-md overflow-hidden mb-2"
+                class="rounded-lg shadow-md overflow-hidden mb-2"
             >
                 {/* WARN_ING: nav function is not working! if DisplayImage have an `usemap` attribute this will not be valid HTML5!! */}
                 <Link href={"/projects/" + props.data.id} class="cursor-pointer">

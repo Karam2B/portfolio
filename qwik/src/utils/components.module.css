@@ -1,0 +1,11 @@
+.base {
+    background-color: var(--bg-base-100);
+    color: var(--text-base-content);
+}
+
+@media (prefers-color-scheme: dark) {
+    .base {
+        background-color: var(--bg-base-100);
+        color: var(--text-base-content);
+    }
+}
