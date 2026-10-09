@@ -1,11 +1,12 @@
 import { DocumentHead, QwikCityProvider, RouterOutlet } from "@builder.io/qwik-city";
 import { RouterHead } from "./utils/router_head";
-import "./utils/global.css";
 import { component$, isDev } from "@builder.io/qwik";
 import { Base } from "./utils/components";
+import { SANS, usePrefersDark } from "./utils/inline";
 
 
 export default component$(() => {
+    const dark = usePrefersDark();
     return (
         <QwikCityProvider>
             <head>
@@ -19,9 +20,19 @@ export default component$(() => {
                 )}
                 <RouterHead />
             </head>
-            <body lang="en" class="font-sans">
+            <body
+                lang="en"
+                style={{
+                    margin: 0,
+                    fontFamily: SANS,
+                    fontWeight: 400,
+                    lineHeight: 1.5,
+                    background: dark.value ? "#1e293b" : "#ffffff",
+                    color: dark.value ? "#ffffff" : "#000000",
+                }}
+            >
                 <Base>
-                    <div class="min-h-screen">
+                    <div style={{ minHeight: "100vh" }}>
                         <RouterOutlet />
                     </div>
                 </Base>

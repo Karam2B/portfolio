@@ -135,8 +135,8 @@ export const Marked = component$((props: { content: Token[], nesting_level: numb
         }
 
         if (token.type === "code") {
-            return <pre class={`language-${token.lang}`}>
-                <code>{escape_html_entities(token.text)}</code>
+            return <pre style={{ overflowX: "auto", margin: "1rem 0" }}>
+                <code style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" }}>{escape_html_entities(token.text)}</code>
             </pre>
         }
 
@@ -199,8 +199,9 @@ const LighthouseReport = component$(() => {
             style={{
                 height: (height.value && height.value + 100 + "px") || "100vh",
                 opacity: height.value ? 1 : 0,
+                width: "100%",
+                minHeight: "100%",
             }}
-            class="w-full min-h-full"
             src="/lighthouse.html"
         />
     );

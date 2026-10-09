@@ -1,82 +1,161 @@
-import { Slot, component$, useStylesScoped$ } from "@builder.io/qwik";
-import NoPreview from "~/../public/noPreview.svg?raw"
+import { Slot, component$, useSignal } from "@builder.io/qwik";
+import { Link } from "@builder.io/qwik-city";
+import { linkColor, usePrefersDark, useViewport } from "./inline";
 
 export const Separator = component$(() => {
-    return <div class="min-w-[1px] min-h-[1px] self-stretch bg-black/80 dark:bg-white/80"><Slot /></div>
-})
+    const dark = usePrefersDark();
+    return (
+        <div
+            style={{
+                width: "100%",
+                height: 1,
+                background: dark.value ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)",
+            }}
+        />
+    );
+});
 
 export const Base = component$(() => {
-    return <div class="dark:bg-slate-800 dark:text-white"><Slot /></div>
-})
-
-export const MainGrid = component$(() => {
-    return <div class="w-[800px] max-w-[90vw] m-auto"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><Slot /></div></div>
-})
-
-export const StyleA = component$(() => {
-    return <span
-        class={`
-cursor-pointer
-          [&_a]:active:translate-y-1px
-          [&_a]:active:translate-y-1px
-
-          [&_a]:text-blue-500 
-          [&_a]:dark:text-blue-400
-
-          [&_svg]:fill-blue-500 
-          [&_svg]:dark:fill-blue-400
-
-          [&_vg]:hover:fill-blue-600 
-          [&_vg]:dark:hover:fill-blue-500
-`}
-    ><Slot /></span>
-})
-
-export const DisplayImage = component$(function({
-    src,
-    ratio,
-}: {
-    src?: string | null;
-    ratio?: number;
-}) {
+    const dark = usePrefersDark();
     return (
-        <div class="rounded-xl ">
-            <AspectRatio ratio={ratio || 66}>
-                {!src ? (
-                        <div
-                            class="rounded-xl w-full h-full p-5 bg-white"
-                            dangerouslySetInnerHTML={NoPreview}
-                        />
-                ) : (
-                    <img class="rounded-xl" src={import.meta.env.PUBLIC_MEDIA_BUCKET_DOMAIN + "/raw" + src} alt="Display Image" />)}
-            </AspectRatio>
+        <div
+            style={{
+                background: dark.value ? "#1e293b" : "#ffffff",
+                color: dark.value ? "#ffffff" : "#000000",
+                minHeight: "100vh",
+            }}
+        >
+            <Slot />
         </div>
     );
 });
 
-const AspectRatio = component$(function({ ratio }: { ratio: number }) {
-    useStylesScoped$(`
-       .ar-container {
-            position: relative;
-            width: 100%;
-            height: 0;
-            padding-bottom: var(--ar-ratio);
-        }
-        .ar-container > :global(*) {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        } 
-        .ar-container :global(svg) {
-            width: 100%;
-            height: 100%;
-        }
-    `);
-
+export const MainGrid = component$(() => {
+    const viewport = useViewport();
+    const twoColumns = viewport.value.width >= 768;
     return (
-        <div class="ar-container" style={{ "--ar-ratio": ratio + "%" }}>
+        <div style={{ width: "min(800px, 90vw)", margin: "0 auto" }}>
+            <div
+                style={{
+                    display: "grid",
+                    gridTemplateColumns: twoColumns ? "1fr 1fr" : "1fr",
+                    gap: "1rem",
+                }}
+            >
+                <Slot />
+            </div>
+        </div>
+    );
+});
+
+export const InlineA = component$((props: {
+    href: string;
+    target?: string;
+    ariaLabel?: string;
+    fontSize?: string | number;
+}) => {
+    const dark = usePrefersDark();
+    const hover = useSignal(false);
+    const pressed = useSignal(false);
+    return (
+        <a
+            href={props.href}
+            target={props.target}
+            aria-label={props.ariaLabel}
+            style={{
+                cursor: "pointer",
+                color: linkColor(dark.value, hover.value),
+                textDecoration: "none",
+                transform: pressed.value ? "translateY(1px)" : "none",
+                ...(props.fontSize !== undefined ? { fontSize: props.fontSize } : {}),
+            }}
+            onMouseEnter$={() => {
+                hover.value = true;
+            }}
+            onMouseLeave$={() => {
+                hover.value = false;
+                pressed.value = false;
+            }}
+            onMouseDown$={() => {
+                pressed.value = true;
+            }}
+            onMouseUp$={() => {
+                pressed.value = false;
+            }}
+        >
             <Slot />
+        </a>
+    );
+});
+
+export const InlineLink = component$((props: { href: string; fontSize?: string | number }) => {
+    const dark = usePrefersDark();
+    const hover = useSignal(false);
+    const pressed = useSignal(false);
+    return (
+        <Link
+            href={props.href}
+            style={{
+                cursor: "pointer",
+                color: linkColor(dark.value, hover.value),
+                textDecoration: "none",
+                transform: pressed.value ? "translateY(1px)" : "none",
+                ...(props.fontSize !== undefined ? { fontSize: props.fontSize } : {}),
+            }}
+            onMouseEnter$={() => {
+                hover.value = true;
+            }}
+            onMouseLeave$={() => {
+                hover.value = false;
+                pressed.value = false;
+            }}
+            onMouseDown$={() => {
+                pressed.value = true;
+            }}
+            onMouseUp$={() => {
+                pressed.value = false;
+            }}
+        >
+            <Slot />
+        </Link>
+    );
+});
+
+export const DisplayImage = component$((props: { src?: string | null; ratio?: number }) => {
+    const ratio = props.ratio || 66;
+    return (
+        <div style={{ borderRadius: 12 }}>
+            <div style={{ position: "relative", width: "100%", height: 0, paddingBottom: `${ratio}%` }}>
+                <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0 }}>
+                    {!props.src ? (
+                        <img
+                            src="/noPreview.svg"
+                            alt="Display Image"
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain",
+                                background: "#ffffff",
+                                borderRadius: 12,
+                                padding: "1.25rem",
+                                boxSizing: "border-box",
+                            }}
+                        />
+                    ) : (
+                        <img
+                            src={import.meta.env.PUBLIC_MEDIA_BUCKET_DOMAIN + "/raw" + props.src}
+                            alt="Display Image"
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                borderRadius: 12,
+                                display: "block",
+                            }}
+                        />
+                    )}
+                </div>
+            </div>
         </div>
     );
 });

@@ -2,6 +2,7 @@ import { RequestEvent } from "@builder.io/qwik-city";
 import { links } from "~/utils/links";
 import * as cc from "change-case";
 import { Slot, component$ } from "@builder.io/qwik";
+import { InlineA } from "~/utils/components";
 
 export const onGet = async ({ redirect, params }: RequestEvent) => {
     const link = cc.snakeCase(params.link);
@@ -20,12 +21,9 @@ export const LinkAsA = component$((props: { name: IdOf<typeof links> }) => {
     let found = links.find((search) => search.text === props.name);
     if (!found) throw new Error("link is not found");
     return (
-        <a href={found.href} class="
-        cursor-pointer active:translate-y-1px
-        text-blue-500 hover:text-blue-600 
-        dark:text-blue dark:hover:text-blue-500" >
+        <InlineA href={found.href}>
             <Slot />
-        </a>
+        </InlineA>
     );
 })
 

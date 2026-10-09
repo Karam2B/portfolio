@@ -1,11 +1,10 @@
-import { component$, useComputed$, useSignal, useStylesScoped$, useTask$ } from "@builder.io/qwik";
-import { routeLoader$, server$, StaticGenerateHandler, useLocation } from "@builder.io/qwik-city";
-import { DisplayImage, StyleA } from "~/utils/components";
+import { component$, useComputed$ } from "@builder.io/qwik";
+import { routeLoader$, StaticGenerateHandler } from "@builder.io/qwik-city";
+import { DisplayImage, InlineA } from "~/utils/components";
 import { MoChevronRight } from "@qwikest/icons/monoicons";
 import Github from "~/../public/github.svg?jsx";
 import Live from "~/../public/live.svg?jsx";
 import { DateTime } from "luxon";
-import { marked } from "marked";
 import { one_project_2, all_projects_ids } from "~/utils/endpoint_2";
 import { get_marked_engine, Marked } from "~/utils/marked_down";
 
@@ -29,68 +28,64 @@ export default component$(() => {
     })
 
     if (project.value.found === "none") {
-        return <div class="w-[800px] max-w-[95vw] m-auto">
-            <div class="h-[400px] flex flex-col items-center justify-center">
-                <span class="text-7xl">
+        return <div style={{ width: "min(800px, 95vw)", margin: "0 auto" }}>
+            <div style={{ height: 400, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: "4.5rem", lineHeight: 1 }}>
                     Project Not Found
                 </span>
-                <StyleA><div class="mt-4 flex gap-2"><a href="/">go home</a> | <a href="/projects">go to all project</a></div></StyleA>
+                <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem" }}>
+                    <InlineA href="/">go home</InlineA>
+                    <span>|</span>
+                    <InlineA href="/projects">go to all project</InlineA>
+                </div>
             </div>
         </div>
     }
 
 
-    return <div class="w-[500px] max-w-[95vw] m-auto">
-        <div class="flex items-center gap-3 py-7 text-3xl">
-            <StyleA>
-                <a href="/">Home</a>
-            </StyleA>
+    return <div style={{ width: "min(500px, 95vw)", margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "1.75rem 0", fontSize: "1.875rem", lineHeight: "2.25rem" }}>
+            <InlineA href="/">Home</InlineA>
             <MoChevronRight />
-            <StyleA>
-                <a href="/projects">Project</a>
-            </StyleA>
+            <InlineA href="/projects">Project</InlineA>
         </div>
 
-        <div class="rounded-xl pb-5">
+        <div style={{ borderRadius: 12, paddingBottom: "1.25rem" }}>
             <DisplayImage src={project.value.value.display_picture} />
         </div>
-        <h1 class="text-3xl pb-0">{project.value.value.title}</h1>
-        <p class="opacity-70">
+        <h1 style={{ fontSize: "1.875rem", lineHeight: "2.25rem", fontWeight: 400, margin: 0 }}>{project.value.value.title}</h1>
+        <p style={{ margin: 0, opacity: 0.7 }}>
             created at{" "}
             <time>
                 {DateTime.fromISO(project.value.value.created_at).toFormat("LLL dd yyyy")}
             </time>
         </p>
 
-        <div class="flex gap-3">
+        <div style={{ display: "flex", gap: "0.75rem" }}>
             {project.value.value.github_link && (
-                <StyleA>
-                    <a target="_blank" href={project.value.value.github_link}>
-                        <Github
-                            //@ts-ignore
-                            height="16"
-                            width="16"
-                            class=" inline"
-                        />{" "}
-                        View Source Code
-                    </a>
-
-                </StyleA>
+                <InlineA href={project.value.value.github_link} target="_blank">
+                    <Github
+                        //@ts-ignore
+                        height="16"
+                        width="16"
+                        style={{ display: "inline", fill: "currentColor", width: 16, height: 16 }}
+                    />{" "}
+                    View Source Code
+                </InlineA>
             )}
             {project.value.value.live_link && (
-                <StyleA>
-                    <a target="_blank" href={project.value.value.live_link} class="">
-                        <Live //@ts-ignore
-                            height="16"
-                            width="16"
-                            class="inline"
-                        />{" "}
-                        View Live Code
-                    </a>
-                </StyleA>
+                <InlineA href={project.value.value.live_link} target="_blank">
+                    <Live
+                        //@ts-ignore
+                        height="16"
+                        width="16"
+                        style={{ display: "inline", fill: "currentColor", width: 16, height: 16 }}
+                    />{" "}
+                    View Live Code
+                </InlineA>
             )}
         </div>
-        <div class="markdown" >
+        <div style={{ marginTop: "1rem" }}>
             <Marked content={parse_content.value} nesting_level={0} />
         </div>
     </div>

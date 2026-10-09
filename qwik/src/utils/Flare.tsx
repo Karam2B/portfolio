@@ -1,84 +1,125 @@
-import { component$, useOnWindow, useSignal ,$, useStylesScoped$} from "@builder.io/qwik";
+import { component$, useOnWindow, useSignal, $ } from "@builder.io/qwik";
 import BgSelector from "~/../public/hov/selector.webp";
 import BgShades from "~/../public/hov/shades.png";
-
+import { usePrefersDark } from "./inline";
 
 export const Flare = component$((props: { shift?: number }) => {
-    const ref = useSignal<HTMLDivElement>();
+    const ref = useSignal<HTMLImageElement>();
     const loc = useSignal({ x: -250, y: -350 });
+    const dark = usePrefersDark();
 
     useOnWindow(
         "mousemove",
         $((e) => {
             const event = e as MouseEvent;
-
             if (!ref.value) return;
-
             const svg = ref.value.getBoundingClientRect();
             loc.value = { x: event.clientX - svg.x, y: event.clientY - svg.y };
         }),
     );
 
-    useStylesScoped$(`
-    #background-mouse-effect {
-        mask-image: url(${BgSelector});
-        mask-position: var(--x) var(--y);
-        mask-repeat: no-repeat;
+    const maskPosition = `${loc.value.x - 517}px ${loc.value.y - 517}px`;
 
-        -webkit-mask-image: url(${BgSelector});
-        -webkit-mask-position: var(--x) var(--y);
-        -webkit-mask-repeat: no-repeat;
-    }
-  `);
-    return <div class="relative">
-        <div class="absolute w-full overflow-hidden" style={{ top: `${props.shift}px` }}>
-            <div class="grid place-content-center w-screen h-screen overflow-hidden overflow-y-visible">
-                <div class="min-w-[1200px] min-h-[800px]">
-                    <div
-                        // @ts-ignore
-                        style={{ speak: "none" }}
-                        role="presentation"
-                        tabIndex={-1}
-                        class={[
-                            "print:hidden relative isolate min-h-800px min-h-800px mix-blend-exclusion",
-                        ]}
-                    >
-                        <img
-                            alt=""
-                            aria-hidden="true"
-                            id="background-pattern"
-                            src={BgShades}
-                            height={800}
-                            width={1200}
-                            class={[
-                                "max-w-initial absolute inset-0 z-3",
-                                "dark:mix-blend-difference dark:invert",
-                            ]}
-                            loading="lazy"
-                        />
-
-                        <div class="absolute inset-0 z-4 mix-blend-multiply dark:mix-blend-overlay">
+    return (
+        <div style={{ position: "relative" }}>
+            <div
+                style={{
+                    position: "absolute",
+                    width: "100%",
+                    overflow: "hidden",
+                    ...(props.shift !== undefined ? { top: props.shift } : {}),
+                }}
+            >
+                <div
+                    style={{
+                        display: "grid",
+                        placeContent: "center",
+                        width: "100vw",
+                        height: "100vh",
+                        overflow: "hidden",
+                        overflowY: "visible",
+                    }}
+                >
+                    <div style={{ minWidth: 1200, minHeight: 800 }}>
+                        <div
+                            role="presentation"
+                            tabIndex={-1}
+                            style={{
+                                position: "relative",
+                                isolation: "isolate",
+                                minHeight: 800,
+                                mixBlendMode: "exclusion",
+                            }}
+                        >
                             <img
                                 alt=""
                                 aria-hidden="true"
-                                ref={ref}
-                                id="background-mouse-effect"
+                                id="background-pattern"
                                 src={BgShades}
-                                style={{
-                                    "--x": loc.value.x - 517 + "px",
-                                    "--y": loc.value.y - 517 + "px",
-                                }}
                                 height={800}
                                 width={1200}
-                                class={["max-w-initial"]}
+                                style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    left: 0,
+                                    zIndex: 3,
+                                    maxWidth: "none",
+                                    mixBlendMode: dark.value ? "difference" : "normal",
+                                    filter: dark.value ? "invert(1)" : "none",
+                                }}
                                 loading="lazy"
                             />
-                        </div>
 
-                        <div class="bg-white dark:bg-black absolute w-full h-full inset-0" />
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    left: 0,
+                                    zIndex: 4,
+                                    mixBlendMode: dark.value ? "overlay" : "multiply",
+                                }}
+                            >
+                                <img
+                                    alt=""
+                                    aria-hidden="true"
+                                    ref={ref}
+                                    id="background-mouse-effect"
+                                    src={BgShades}
+                                    height={800}
+                                    width={1200}
+                                    style={{
+                                        maxWidth: "none",
+                                        maskImage: `url(${BgSelector})`,
+                                        WebkitMaskImage: `url(${BgSelector})`,
+                                        maskPosition,
+                                        WebkitMaskPosition: maskPosition,
+                                        maskRepeat: "no-repeat",
+                                        WebkitMaskRepeat: "no-repeat",
+                                    }}
+                                    loading="lazy"
+                                />
+                            </div>
+
+                            <div
+                                style={{
+                                    background: dark.value ? "#000000" : "#ffffff",
+                                    position: "absolute",
+                                    width: "100%",
+                                    height: "100%",
+                                    top: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    left: 0,
+                                }}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-})
+    );
+});

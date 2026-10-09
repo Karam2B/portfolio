@@ -1,76 +1,77 @@
-import { component$ } from "@builder.io/qwik"
-import * as  v from "valibot"
-import { project_schema } from "./endpoint_2"
-import { Link, useNavigate } from "@builder.io/qwik-city";
-import Github from "~/../public/github.svg?jsx"
-import Live from "~/../public/live.svg?jsx"
-import { DisplayImage, StyleA } from "./components";
+import { component$ } from "@builder.io/qwik";
+import * as v from "valibot";
+import { project_schema } from "./endpoint_2";
+import { Link } from "@builder.io/qwik-city";
+import Github from "~/../public/github.svg?jsx";
+import Live from "~/../public/live.svg?jsx";
+import { DisplayImage, InlineA } from "./components";
+import { usePrefersDark } from "./inline";
 
 export const ProjectSummary = component$((props: {
-    data:
-    Omit<v.InferOutput<typeof project_schema>, "content">
+    data: Omit<v.InferOutput<typeof project_schema>, "content">;
 }) => {
-    const _nav = useNavigate();
+    const dark = usePrefersDark();
 
     return (
         <div>
             <div
                 role="link"
-                class="rounded-lg shadow-md overflow-hidden mb-2"
+                style={{
+                    borderRadius: 8,
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+                    overflow: "hidden",
+                    marginBottom: "0.5rem",
+                }}
             >
-                {/* WARN_ING: nav function is not working! if DisplayImage have an `usemap` attribute this will not be valid HTML5!! */}
-                <Link href={"/projects/" + props.data.id} class="cursor-pointer">
-                    <DisplayImage
-                        src={props.data.display_picture}
-                        ratio={66}
-                    />
+                <Link href={"/projects/" + props.data.id} style={{ cursor: "pointer" }}>
+                    <DisplayImage src={props.data.display_picture} ratio={66} />
                 </Link>
             </div>
-            <Link href={"/projects/" + props.data.id} class="text-2xl font-300 cursor-pointer">
+            <Link
+                href={"/projects/" + props.data.id}
+                style={{
+                    fontSize: "1.5rem",
+                    lineHeight: "2rem",
+                    fontWeight: 300,
+                    cursor: "pointer",
+                    color: "inherit",
+                    textDecoration: "none",
+                }}
+            >
                 {props.data.title}
             </Link>
-            <p class=" text-slate-700/80 dark:text-slate-200/80">{props.data.summary}</p>
+            <p
+                style={{
+                    margin: 0,
+                    color: dark.value ? "rgba(226, 232, 240, 0.8)" : "rgba(51, 65, 85, 0.8)",
+                }}
+            >
+                {props.data.summary}
+            </p>
             <div>
-                <div class="mt-2 flex gap-2">
+                <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
                     {props.data.github_link && (
-                        <StyleA >
-                            <a
-                                target="_blank"
-                                href={props.data.github_link}
-                                class="a"
-                                aria-label="view code on GitHub"
-                            >
-                                <Github
-                                    //@ts-ignore
-                                    height="24"
-                                    width="24"
-                                    class="fill-as-a inline"
-                                />
-                            </a>
-                        </StyleA>
+                        <InlineA href={props.data.github_link} target="_blank" ariaLabel="view code on GitHub">
+                            <Github
+                                //@ts-ignore
+                                height="24"
+                                width="24"
+                                style={{ fill: "currentColor", display: "inline", width: 24, height: 24 }}
+                            />
+                        </InlineA>
                     )}
                     {props.data.live_link && (
-
-                        <StyleA >
-                            <a
-                                target="_blank"
-                                href={props.data.live_link}
-                                class="a"
-                                aria-label="view live demo"
-                            >
-                                <Live //@ts-ignore
-                                    height="24"
-                                    width="24"
-                                    class="fill-as-a inline"
-                                />
-                            </a>
-
-                        </StyleA>
+                        <InlineA href={props.data.live_link} target="_blank" ariaLabel="view live demo">
+                            <Live
+                                //@ts-ignore
+                                height="24"
+                                width="24"
+                                style={{ fill: "currentColor", display: "inline", width: 24, height: 24 }}
+                            />
+                        </InlineA>
                     )}
                 </div>
             </div>
         </div>
     );
-})
-
-
+});

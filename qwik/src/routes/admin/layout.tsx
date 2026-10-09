@@ -1,4 +1,5 @@
-import { component$, Slot, useStyles$ } from "@builder.io/qwik";
+import { component$, Slot } from "@builder.io/qwik";
+import { InlineA } from "~/utils/components";
 import { routeLoader$ } from "@builder.io/qwik-city";
 import { decode } from "js-base64"
 import jwt from "jsonwebtoken";
@@ -30,7 +31,7 @@ export default component$(() => {
     return <>
         {auth.value.pass ?
             <Slot />
-            : <div class="flex flex-col justify-center items-center h-screen"><div>Unauthorized</div><a href="/auth">auth</a></div>
+            : <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh" }}><div>Unauthorized</div><InlineA href="/auth">auth</InlineA></div>
         }
     </>
 })

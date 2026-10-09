@@ -104,27 +104,27 @@ export default component$(() => {
             authorized_already.value = { email };
         }
     });
-    return <div class="w-[500px] max-w-[90vw] m-auto pt-10" >
-        <p>
+    return <div style={{ width: "min(500px, 90vw)", margin: "0 auto", paddingTop: "2.5rem" }} >
+        <p style={{ margin: 0 }}>
             Hi there, I'm interested how you knew this route exists. Anyway, only authorized users have access, tell me how are you:
         </p>
-        <div class="flex flex-col">
+        <div style={{ display: "flex", flexDirection: "column" }}>
             <a href={
                 `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.PUBLIC_GOOGLE_OAUTH_CLIENT_ID}&redirect_uri=${location.url.origin}${location.url.pathname}&response_type=code&scope=email`
-            } class="mt-10 m-auto w-fit cursor-pointer px-5 py-2 bg-green-500 text-white rounded-md">
+            } style={{ marginTop: "2.5rem", marginLeft: "auto", marginRight: "auto", width: "fit-content", cursor: "pointer", padding: "0.5rem 1.25rem", background: "#22c55e", color: "#ffffff", borderRadius: 6, textDecoration: "none" }}>
                 Auth with Google
             </a>
         </div>
-        <div class="mt-10">
+        <div style={{ marginTop: "2.5rem" }}>
             {
-                code.value.state === "authorized" ? <div class="overflow-hidden">Hi there: {code.value.name}</div>
+                code.value.state === "authorized" ? <div style={{ overflow: "hidden" }}>Hi there: {code.value.name}</div>
                     : authorized_already.value && authorized_already.value.expired ? <div>Your token has expired, please login again</div>
                         : authorized_already.value && authorized_already.value.email ? <div>Hi there: {authorized_already.value.email}</div>
                             : code.value.state === "bug" ? <div>
                                 ops, there must be a bug, will catch it and comeback
-                                <div class="cursor-pointer" onClick$={() => show_info.value = !show_info.value}>view</div>
+                                <div style={{ cursor: "pointer" }} onClick$={() => show_info.value = !show_info.value}>view</div>
                                 {show_info.value && (
-                                    <pre class="overflow-scroll">
+                                    <pre style={{ overflow: "scroll" }}>
                                         {JSON.stringify(code.value, null, 2)}
                                     </pre>
                                 )}

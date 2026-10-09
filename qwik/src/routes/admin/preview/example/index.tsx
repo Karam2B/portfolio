@@ -10,7 +10,7 @@ export default component$(() => {
     })
     return <div>
         <Marked content={s.value} nesting_level={0} />
-        <pre class="overflow-x-scroll">
+        <pre style={{ overflowX: "auto" }}>
             {JSON.stringify(s.value, null, 2)}
         </pre>
     </div>
