@@ -306,9 +306,12 @@ const Projects = component$(() => {
                         }
                     })}
                 </MainGrid>
-                <div style={{ paddingTop: "1.75rem", display: "grid", placeContent: "center" }}>
+                <div style={{ paddingTop: "1.75rem", display: "flex", gap: "1.5rem", justifyContent: "center" }}>
                     <InlineLink href="/projects" fontSize="1.5rem">
                         See All
+                    </InlineLink>
+                    <InlineLink href="/blog" fontSize="1.5rem">
+                        Blog
                     </InlineLink>
                 </div>
             </div>

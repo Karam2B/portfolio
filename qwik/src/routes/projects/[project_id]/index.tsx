@@ -10,7 +10,7 @@ import { get_marked_engine, Marked } from "~/utils/marked_down";
 
 export const use_project = routeLoader$(async (event) => {
     const id = event.params.project_id;
-    let s = await one_project_2(event, Number(id), false);
+    let s = await one_project_2(event, Number(id));
     if (s.found === "none") {
         event.status(404);
     }

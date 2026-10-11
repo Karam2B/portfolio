@@ -1,5 +1,5 @@
 import { component$, Slot } from "@builder.io/qwik";
-import { InlineA } from "~/utils/components";
+import { InlineA, InlineLink } from "~/utils/components";
 import { routeLoader$ } from "@builder.io/qwik-city";
 import { decode } from "js-base64"
 import jwt from "jsonwebtoken";
@@ -30,7 +30,14 @@ export default component$(() => {
     let auth = admin_auth();
     return <>
         {auth.value.pass ?
-            <Slot />
+            <div style={{ width: "min(1100px, 94vw)", margin: "0 auto", padding: "1.5rem 0 3rem" }}>
+                <nav style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}>
+                    <InlineLink href="/admin">Admin</InlineLink>
+                    <InlineLink href="/admin/blog">Blogs</InlineLink>
+                    <InlineLink href="/admin/projects">Projects</InlineLink>
+                </nav>
+                <Slot />
+            </div>
             : <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh" }}><div>Unauthorized</div><InlineA href="/auth">auth</InlineA></div>
         }
     </>

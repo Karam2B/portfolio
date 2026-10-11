@@ -1,7 +1,7 @@
-import { component$, isDev, useSignal } from "@builder.io/qwik";
-import { marked, Token, TokensList } from "marked"
-import { createDirectives, presetDirectiveConfigs, } from "marked-directive"
-import * as v from "valibot"
+import { component$ } from "@builder.io/qwik";
+import { marked, Token } from "marked"
+import { createDirectives } from "marked-directive"
+import { CustomBlock } from "~/custom_components"
 
 export const TokenError = component$((props: { token: Token, code: string }) => {
     return <div></div>
@@ -11,18 +11,18 @@ export const get_marked_engine = () => {
     return marked.use({ async: true, breaks: true, gfm: true }, createDirectives());
 }
 
-export const directive_block_attributes = v.union([
-    v.strictObject({
-        key: v.literal("lighthouse_report"),
-        attrs: v.strictObject({})
-    }),
-])
-
-export const DirectiveBlock = component$((props: v.InferOutput<typeof directive_block_attributes>) => {
-    if (props.key === "lighthouse_report") {
-        return <LighthouseReport />
+function directive_attrs(raw: unknown): Record<string, string> {
+    if (!raw || typeof raw !== "object") return {};
+    const source = Array.isArray(raw) ? Object.fromEntries(raw) : raw;
+    const attrs: Record<string, string> = {};
+    for (const [key, value] of Object.entries(source)) {
+        if (value == null) attrs[key] = "";
+        else if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+            attrs[key] = String(value);
+        }
     }
-})
+    return attrs;
+}
 
 export function escape_html_entities(text: string) {
     return text.replace(/&/g, "&amp;")
@@ -148,61 +148,21 @@ export const Marked = component$((props: { content: Token[], nesting_level: numb
             throw new Error("not willing to implement" + token.type)
         }
 
-        if (token.type.startsWith("directiveBlock")) {
-            let name = (token as any)?.meta?.name;
-            let attrs = (token as any)?.attrs || {};
-            let attrs_ = v.parse(directive_block_attributes, { key: name, attrs });
-            return <DirectiveBlock {...attrs_} />
+        if (token.type.startsWith("directiveInline")) {
+            return <span>Inline components are not supported. Use a ::: block instead.</span>
         }
 
-        if (token.type.startsWith("directiveInline")) {
-            throw new Error("inline directive is not allowed")
+        if (token.type.startsWith("directive")) {
+            const name = String((token as { meta?: { name?: string } }).meta?.name || "");
+            const attrs = directive_attrs((token as { attrs?: unknown }).attrs);
+            const tokens = (token as { tokens?: Token[] }).tokens || [];
+            return (
+                <CustomBlock name={name} attrs={attrs}>
+                    <Marked content={tokens} nesting_level={props.nesting_level + 1} />
+                </CustomBlock>
+            );
         }
 
         return <TokenError token={token} code="uncovered_type" />
     })
 })
-
-const LighthouseReport = component$(() => {
-    const height = useSignal<number | undefined>(0);
-    return (
-        <iframe
-            onLoad$={(_, elem) => {
-                const element = elem.contentWindow as Window | undefined;
-                if (!element) return;
-
-                const styles = document.createElement("Style");
-                styles.innerHTML = `
-          html {
-            overflow: hidden;
-          }
-          body {
-            overflow: visible;
-          }
-          article.lh-root {
-            background: transparent;
-          }
-          .lh-topbar {
-            display: none!important;
-          }
-        `;
-
-                element.document.head.appendChild(styles);
-                height.value = element.document.body.scrollHeight || 0;
-
-                element.document.addEventListener("click", () => {
-                    setTimeout(() => {
-                        height.value = element.document.body.scrollHeight || 0;
-                    }, 150);
-                });
-            }}
-            style={{
-                height: (height.value && height.value + 100 + "px") || "100vh",
-                opacity: height.value ? 1 : 0,
-                width: "100%",
-                minHeight: "100%",
-            }}
-            src="/lighthouse.html"
-        />
-    );
-});
