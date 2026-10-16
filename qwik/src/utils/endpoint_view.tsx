@@ -9,8 +9,10 @@ import { usePrefersDark } from "./inline";
 
 export const ProjectSummary = component$((props: {
     data: Omit<v.InferOutput<typeof project_schema>, "content">;
+    href?: string;
 }) => {
     const dark = usePrefersDark();
+    const href = props.href ?? "/projects/" + props.data.id;
 
     return (
         <div>
@@ -23,12 +25,12 @@ export const ProjectSummary = component$((props: {
                     marginBottom: "0.5rem",
                 }}
             >
-                <Link href={"/projects/" + props.data.id} style={{ cursor: "pointer" }}>
+                <Link href={href} style={{ cursor: "pointer" }}>
                     <DisplayImage src={props.data.display_picture} ratio={66} />
                 </Link>
             </div>
             <Link
-                href={"/projects/" + props.data.id}
+                href={href}
                 style={{
                     fontSize: "1.5rem",
                     lineHeight: "2rem",

@@ -35,6 +35,7 @@ export default component$(() => {
                     <InlineLink href="/admin">Admin</InlineLink>
                     <InlineLink href="/admin/blog">Blogs</InlineLink>
                     <InlineLink href="/admin/projects">Projects</InlineLink>
+                    <InlineLink href="/admin/photos">Photos</InlineLink>
                 </nav>
                 <Slot />
             </div>

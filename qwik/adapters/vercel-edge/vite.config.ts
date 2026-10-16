@@ -11,6 +11,14 @@ export default extendConfig(baseConfig, () => {
       },
       outDir: ".vercel/output/functions/_qwik-city.func",
     },
-    plugins: [vercelEdgeAdapter()],
+    plugins: [
+      vercelEdgeAdapter({
+        ssg: {
+          include: ["/", "/*"],
+          // Leave /preview for the edge function. Every other route is still an HTML file.
+          exclude: ["/preview/*"],
+        },
+      }),
+    ],
   };
 });

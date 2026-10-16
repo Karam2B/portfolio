@@ -8,6 +8,7 @@ export default component$(() => {
             <InlineLink href="/admin/blog/new">New blog post</InlineLink>
             <InlineLink href="/admin/blog">Edit blog posts</InlineLink>
             <InlineLink href="/admin/projects">Edit project bodies</InlineLink>
+            <InlineLink href="/admin/photos">Photos</InlineLink>
             <InlineA href="https://vercel.com/karam-barakats-projects/portfolio" target="_blank">Vercel Deploy</InlineA>
         </div>
     );

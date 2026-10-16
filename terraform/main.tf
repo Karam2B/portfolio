@@ -74,6 +74,55 @@ resource "aws_s3_bucket_ownership_controls" "public_read_ownership_controls" {
   }
 }
 
+resource "aws_s3_bucket_cors_configuration" "main_s3_cors" {
+  bucket = aws_s3_bucket.main_s3.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT", "HEAD", "DELETE"]
+    # Browser PUTs use short-lived presigned URLs; JWT still gates who can mint them.
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
+resource "aws_iam_user" "media_uploader" {
+  name = "tf-portfolio2-media-uploader"
+}
+
+resource "aws_iam_user_policy" "media_uploader" {
+  name = "tf-portfolio2-media-uploader"
+  user = aws_iam_user.media_uploader.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "ListRawPrefix"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = aws_s3_bucket.main_s3.arn
+        Condition = {
+          StringLike = {
+            "s3:prefix" = ["raw", "raw/*"]
+          }
+        }
+      },
+      {
+        Sid      = "WriteRawObjects"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:DeleteObject", "s3:GetObject"]
+        Resource = "${aws_s3_bucket.main_s3.arn}/raw/*"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_access_key" "media_uploader" {
+  user = aws_iam_user.media_uploader.name
+}
+
 // Provider: Turso
 provider "turso" {
   api_token    = var.turso_api_token
@@ -171,6 +220,34 @@ resource "vercel_project_environment_variable" "jwt_secret" {
   target     = ["production", "preview", "development"]
 }
 
+resource "vercel_project_environment_variable" "aws_access_key_id" {
+  project_id = data.vercel_project.frontend.id
+  key        = "AWS_ACCESS_KEY_ID"
+  value      = aws_iam_access_key.media_uploader.id
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "aws_secret_access_key" {
+  project_id = data.vercel_project.frontend.id
+  key        = "AWS_SECRET_ACCESS_KEY"
+  value      = aws_iam_access_key.media_uploader.secret
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "aws_region" {
+  project_id = data.vercel_project.frontend.id
+  key        = "AWS_REGION"
+  value      = "us-west-2"
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "aws_s3_bucket" {
+  project_id = data.vercel_project.frontend.id
+  key        = "AWS_S3_BUCKET"
+  value      = aws_s3_bucket.main_s3.bucket
+  target     = ["production", "preview", "development"]
+}
+
 # public information, that I might use as a hint on how to regenerate terraform.tfstate successfully
 output "gcp_main_email" {
   value = "k99.barakat@gmail.com"
@@ -206,4 +283,8 @@ output "aws_main_email" {
 
 output "aws_s3_bucket_arn" {
   value = aws_s3_bucket.main_s3.arn
+}
+
+output "aws_media_uploader_access_key_id" {
+  value = aws_iam_access_key.media_uploader.id
 }

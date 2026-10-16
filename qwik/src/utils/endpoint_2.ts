@@ -283,8 +283,8 @@ export const use_server_projects_2 = async function (event: RequestEventLoader, 
             p_created_at: v.string(),
             p_display_picture: v.nullable(v.string()),
             p_published: v.nullish(v.any()),
-            s_id: v.optional(v.number()),
-            s_title: v.optional(v.string()), // missing when the LEFT JOIN finds no skill
+            s_id: v.nullable(v.number()),
+            s_title: v.nullable(v.string()), // null when the LEFT JOIN finds no skill
         })
     ), fetched.rows);
 

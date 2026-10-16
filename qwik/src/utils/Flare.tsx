@@ -48,7 +48,7 @@ export const Flare = component$((props: { shift?: number }) => {
                                 position: "relative",
                                 isolation: "isolate",
                                 minHeight: 800,
-                                mixBlendMode: "exclusion",
+                                mixBlendMode: dark.value ? "exclusion" : "normal",
                             }}
                         >
                             <img
@@ -66,6 +66,7 @@ export const Flare = component$((props: { shift?: number }) => {
                                     left: 0,
                                     zIndex: 3,
                                     maxWidth: "none",
+
                                     mixBlendMode: dark.value ? "difference" : "normal",
                                     filter: dark.value ? "invert(1)" : "none",
                                 }}

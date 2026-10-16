@@ -49,7 +49,7 @@ export default component$(() => {
                         </LinkAsA>
                     </div>
                 </AboutMe>
-                <Projects />
+                {/* <Projects /> */}
                 <ContactMe >
                     <span q:slot="message" >
                         I'm currently looking for jobs, you can say hi any time
