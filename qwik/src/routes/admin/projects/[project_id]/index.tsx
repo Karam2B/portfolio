@@ -4,8 +4,7 @@ import * as v from "valibot";
 import { InlineA } from "~/utils/components";
 import { is_admin } from "~/utils/blog";
 import { one_project_2, project_edit_schema, update_project } from "~/utils/endpoint_2";
-import { usePrefersDark } from "~/utils/inline";
-import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, primaryButtonStyle, save_error } from "~/utils/markdown_editor";
+import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, PrimaryButton, save_error } from "~/utils/markdown_editor";
 
 export const use_admin_project = routeLoader$(async (event) => {
     const project = await one_project_2(event, Number(event.params.project_id), true);
@@ -44,7 +43,6 @@ export const use_update_project = routeAction$(async (data, event) => {
 export default component$(() => {
     const loaded = use_admin_project();
     const action = use_update_project();
-    const dark = usePrefersDark();
     const project = loaded.value.found === "some" ? loaded.value.value : null;
     const title = useSignal(project?.title ?? "");
     const summary = useSignal(project?.summary ?? "");
@@ -92,9 +90,9 @@ export default component$(() => {
             <CheckField name="display_on_home" label="Show on the home page" checked={project.display_on_home} />
             <CheckField name="published" label="Published" checked={project.published} />
             <ContentDraft initial={project.content} />
-            <button type="submit" disabled={action.isRunning} style={primaryButtonStyle(dark.value)}>
+            <PrimaryButton type="submit" disabled={action.isRunning}>
                 {action.isRunning ? "Saving…" : "Save"}
-            </button>
+            </PrimaryButton>
             {action.value && (
                 <p style={{ margin: 0 }}>
                     {action.value.message}{" "}

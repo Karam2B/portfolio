@@ -1,12 +1,78 @@
-import { component$, useOnWindow, useSignal, $ } from "@builder.io/qwik";
+import { component$, useOnWindow, useSignal, useStylesScoped$, $ } from "@builder.io/qwik";
 import BgSelector from "~/../public/hov/selector.webp";
 import BgShades from "~/../public/hov/shades.png";
-import { usePrefersDark } from "./inline";
 
 export const Flare = component$((props: { shift?: number }) => {
     const ref = useSignal<HTMLImageElement>();
     const loc = useSignal({ x: -250, y: -350 });
-    const dark = usePrefersDark();
+
+    // Flashing Colors When Opening Page:
+    // Blend modes and invert used to toggle after matchMedia; CSS applies on first paint.
+    useStylesScoped$(`
+        .blend-root {
+            position: relative;
+            isolation: isolate;
+            min-height: 800px;
+        }
+        .pattern {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 3;
+            max-width: none;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 4;
+        }
+        .fill {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+        @media (prefers-color-scheme: light) {
+            .blend-root { mix-blend-mode: normal; }
+            .pattern {
+                mix-blend-mode: normal;
+                filter: none;
+            }
+            .overlay { mix-blend-mode: multiply; }
+            .fill { background: #ffffff; }
+        }
+        @media (prefers-color-scheme: dark) {
+            .blend-root { mix-blend-mode: exclusion; }
+            .pattern {
+                mix-blend-mode: difference;
+                filter: invert(1);
+            }
+            .overlay { mix-blend-mode: overlay; }
+            .fill { background: #000000; }
+        }
+        .force_scheme_to_light.blend-root { mix-blend-mode: normal; }
+        .force_scheme_to_light.pattern {
+            mix-blend-mode: normal;
+            filter: none;
+        }
+        .force_scheme_to_light.overlay { mix-blend-mode: multiply; }
+        .force_scheme_to_light.fill { background: #ffffff; }
+        .force_scheme_to_dark.blend-root { mix-blend-mode: exclusion; }
+        .force_scheme_to_dark.pattern {
+            mix-blend-mode: difference;
+            filter: invert(1);
+        }
+        .force_scheme_to_dark.overlay { mix-blend-mode: overlay; }
+        .force_scheme_to_dark.fill { background: #000000; }
+    `);
 
     useOnWindow(
         "mousemove",
@@ -41,49 +107,19 @@ export const Flare = component$((props: { shift?: number }) => {
                     }}
                 >
                     <div style={{ minWidth: 1200, minHeight: 800 }}>
-                        <div
-                            role="presentation"
-                            tabIndex={-1}
-                            style={{
-                                position: "relative",
-                                isolation: "isolate",
-                                minHeight: 800,
-                                mixBlendMode: dark.value ? "exclusion" : "normal",
-                            }}
-                        >
+                        <div class="blend-root" role="presentation" tabIndex={-1}>
                             <img
+                                class="pattern"
                                 alt=""
                                 aria-hidden="true"
                                 id="background-pattern"
                                 src={BgShades}
                                 height={800}
                                 width={1200}
-                                style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    left: 0,
-                                    zIndex: 3,
-                                    maxWidth: "none",
-
-                                    mixBlendMode: dark.value ? "difference" : "normal",
-                                    filter: dark.value ? "invert(1)" : "none",
-                                }}
                                 loading="lazy"
                             />
 
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    left: 0,
-                                    zIndex: 4,
-                                    mixBlendMode: dark.value ? "overlay" : "multiply",
-                                }}
-                            >
+                            <div class="overlay">
                                 <img
                                     alt=""
                                     aria-hidden="true"
@@ -105,18 +141,7 @@ export const Flare = component$((props: { shift?: number }) => {
                                 />
                             </div>
 
-                            <div
-                                style={{
-                                    background: dark.value ? "#000000" : "#ffffff",
-                                    position: "absolute",
-                                    width: "100%",
-                                    height: "100%",
-                                    top: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    left: 0,
-                                }}
-                            />
+                            <div class="fill" />
                         </div>
                     </div>
                 </div>

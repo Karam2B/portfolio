@@ -1,18 +1,32 @@
-import { component$ } from "@builder.io/qwik";
+import { component$, useStylesScoped$ } from "@builder.io/qwik";
 import * as v from "valibot";
 import { project_schema } from "./endpoint_2";
 import { Link } from "@builder.io/qwik-city";
 import Github from "~/../public/github.svg?jsx";
 import Live from "~/../public/live.svg?jsx";
 import { DisplayImage, InlineA } from "./components";
-import { usePrefersDark } from "./inline";
 
 export const ProjectSummary = component$((props: {
     data: Omit<v.InferOutput<typeof project_schema>, "content">;
     href?: string;
 }) => {
-    const dark = usePrefersDark();
     const href = props.href ?? "/projects/" + props.data.id;
+
+    // Flashing Colors When Opening Page:
+    // Summary text contrast used to wait on usePrefersDark.
+    useStylesScoped$(`
+        .summary {
+            margin: 0;
+        }
+        @media (prefers-color-scheme: light) {
+            .summary { color: rgba(51, 65, 85, 0.8); }
+        }
+        @media (prefers-color-scheme: dark) {
+            .summary { color: rgba(226, 232, 240, 0.8); }
+        }
+        .force_scheme_to_light.summary { color: rgba(51, 65, 85, 0.8); }
+        .force_scheme_to_dark.summary { color: rgba(226, 232, 240, 0.8); }
+    `);
 
     return (
         <div>
@@ -42,12 +56,7 @@ export const ProjectSummary = component$((props: {
             >
                 {props.data.title}
             </Link>
-            <p
-                style={{
-                    margin: 0,
-                    color: dark.value ? "rgba(226, 232, 240, 0.8)" : "rgba(51, 65, 85, 0.8)",
-                }}
-            >
+            <p class="summary">
                 {props.data.summary}
             </p>
             <div>

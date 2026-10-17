@@ -3,8 +3,7 @@ import { Form, routeAction$, type DocumentHead } from "@builder.io/qwik-city";
 import * as v from "valibot";
 import { create_blog, create_blog_schema, is_admin } from "~/utils/blog";
 import { InlineA } from "~/utils/components";
-import { usePrefersDark } from "~/utils/inline";
-import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, primaryButtonStyle, save_error } from "~/utils/markdown_editor";
+import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, PrimaryButton, save_error } from "~/utils/markdown_editor";
 
 export const use_create_blog = routeAction$(async (data, event) => {
     if (!is_admin(event)) {
@@ -29,7 +28,6 @@ export const use_create_blog = routeAction$(async (data, event) => {
 
 export default component$(() => {
     const action = use_create_blog();
-    const dark = usePrefersDark();
 
     return (
         <Form action={action} style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
@@ -44,9 +42,9 @@ export default component$(() => {
             </label>
             <CheckField name="published" label="Published" checked={true} />
             <ContentDraft initial="" />
-            <button type="submit" disabled={action.isRunning} style={primaryButtonStyle(dark.value)}>
+            <PrimaryButton type="submit" disabled={action.isRunning}>
                 {action.isRunning ? "Publishing…" : "Publish"}
-            </button>
+            </PrimaryButton>
             {action.value && (
                 <p style={{ margin: 0 }}>
                     {action.value.message}{" "}

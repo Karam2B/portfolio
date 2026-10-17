@@ -1,4 +1,4 @@
-import { $, Slot, component$, useOnWindow, useSignal, useVisibleTask$ } from "@builder.io/qwik";
+import { $, Slot, component$, useOnWindow, useSignal, useStylesScoped$, useVisibleTask$ } from "@builder.io/qwik";
 import ScrollIcon from "~/../public/scroll.svg?jsx";
 import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
 import { InlineA, InlineLink, MainGrid, Separator } from "~/utils/components";
@@ -7,7 +7,7 @@ import { ProjectSummary } from "~/utils/endpoint_view";
 import { links } from "~/utils/links";
 import { Flare } from "~/utils/Flare";
 import { use_server_projects_2 } from "~/utils/endpoint_2";
-import { usePrefersDark, useViewport } from "~/utils/inline";
+import { useViewport } from "~/utils/inline";
 
 export default component$(() => {
     const aboutParagraph = {
@@ -100,7 +100,36 @@ const IndexStructure = component$(() => {
 const Scroll = component$(() => {
     const hide = useSignal(false);
     const offset = useSignal(0);
-    const dark = usePrefersDark();
+
+    // Flashing Colors When Opening Page:
+    // Icon fill/stroke used to wait for usePrefersDark.
+    useStylesScoped$(`
+        .icon {
+            width: 40px;
+            height: 40px;
+            transition: opacity 0.2s ease;
+        }
+        @media (prefers-color-scheme: light) {
+            .icon {
+                fill: #000000;
+                stroke: #000000;
+            }
+        }
+        @media (prefers-color-scheme: dark) {
+            .icon {
+                fill: #ffffff;
+                stroke: #ffffff;
+            }
+        }
+        .force_scheme_to_light.icon {
+            fill: #000000;
+            stroke: #000000;
+        }
+        .force_scheme_to_dark.icon {
+            fill: #ffffff;
+            stroke: #ffffff;
+        }
+    `);
 
     useOnWindow(
         "scroll",
@@ -128,14 +157,10 @@ const Scroll = component$(() => {
             }}
         >
             <ScrollIcon
+                class="icon"
                 style={{
-                    width: 40,
-                    height: 40,
-                    fill: dark.value ? "#ffffff" : "#000000",
-                    stroke: dark.value ? "#ffffff" : "#000000",
                     opacity: hide.value ? 0 : 1,
                     transform: hide.value ? "translateY(15px)" : `translateY(${offset.value}px)`,
-                    transition: "opacity 0.2s ease",
                 }}
             />
         </div>
@@ -219,10 +244,27 @@ const AboutMe = component$(() => {
 });
 
 const AnimatedLine = component$(() => {
-    const dark = usePrefersDark();
     const viewport = useViewport();
     const draw = useSignal(0);
     const narrow = viewport.value.width <= 1280;
+
+    // Flashing Colors When Opening Page:
+    // Path stroke used to flip after matchMedia.
+    useStylesScoped$(`
+        .draw-path {
+            fill-opacity: 0;
+            stroke-width: 2;
+            stroke-dasharray: 3223px;
+        }
+        @media (prefers-color-scheme: light) {
+            .draw-path { stroke: #000000; }
+        }
+        @media (prefers-color-scheme: dark) {
+            .draw-path { stroke: #ffffff; }
+        }
+        .force_scheme_to_light.draw-path { stroke: #000000; }
+        .force_scheme_to_dark.draw-path { stroke: #ffffff; }
+    `);
 
     return (
         <div
@@ -252,12 +294,9 @@ const AnimatedLine = component$(() => {
                     height="2200"
                 >
                     <path
+                        class="draw-path"
                         d="m600 0c0 0 0 42 0 96 0 54-14.2 180.6-237.8 272-233.4 95.5-264.4 304.5-259.1 469.8 5.3 162.6 79.3 355.6 239 472.3 97.7 71.4 257.7 147.4 375.5 93.7 55.6-25.3 61.4-100.7 24.5-125.8-36.1-24.6-91.9-21.3-131.7 18-78 77.2-8.5 201.5-10.5 599.2-0.2 54.3 0.1 244.7 0.1 304.8"
                         style={{
-                            fillOpacity: 0,
-                            stroke: dark.value ? "#ffffff" : "#000000",
-                            strokeWidth: 2,
-                            strokeDasharray: "3223px",
                             strokeDashoffset: `${3223 * (1 - draw.value)}px`,
                         }}
                     />

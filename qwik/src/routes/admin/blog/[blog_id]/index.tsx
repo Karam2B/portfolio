@@ -3,8 +3,7 @@ import { Form, routeAction$, routeLoader$, type DocumentHead } from "@builder.io
 import * as v from "valibot";
 import { edit_blog_schema, is_admin, one_blog, update_blog } from "~/utils/blog";
 import { InlineA } from "~/utils/components";
-import { usePrefersDark } from "~/utils/inline";
-import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, primaryButtonStyle, save_error } from "~/utils/markdown_editor";
+import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, PrimaryButton, save_error } from "~/utils/markdown_editor";
 
 export const use_admin_blog = routeLoader$(async (event) => {
     const post = await one_blog(event.env, Number(event.params.blog_id), true);
@@ -33,7 +32,6 @@ export const use_update_blog = routeAction$(async (data, event) => {
 export default component$(() => {
     const loaded = use_admin_blog();
     const action = use_update_blog();
-    const dark = usePrefersDark();
     const post = loaded.value.found === "some" ? loaded.value.value : null;
     const title = useSignal(post?.title ?? "");
     const summary = useSignal(post?.summary ?? "");
@@ -60,9 +58,9 @@ export default component$(() => {
             </label>
             <CheckField name="published" label="Published" checked={post.published} />
             <ContentDraft initial={post.content} />
-            <button type="submit" disabled={action.isRunning} style={primaryButtonStyle(dark.value)}>
+            <PrimaryButton type="submit" disabled={action.isRunning}>
                 {action.isRunning ? "Saving…" : "Save"}
-            </button>
+            </PrimaryButton>
             {action.value && (
                 <p style={{ margin: 0 }}>
                     {action.value.message}{" "}

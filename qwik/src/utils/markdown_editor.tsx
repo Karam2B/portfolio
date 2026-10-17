@@ -1,4 +1,4 @@
-import { component$, useComputed$, useSignal, type Signal } from "@builder.io/qwik";
+import { Slot, component$, useComputed$, useSignal, useStylesScoped$, type QRL, type Signal } from "@builder.io/qwik";
 import { get_marked_engine, Marked } from "./marked_down";
 import { useViewport } from "./inline";
 
@@ -13,18 +13,82 @@ export const fieldStyle = {
     borderRadius: 8,
 };
 
-export function primaryButtonStyle(dark: boolean) {
-    return {
-        width: "fit-content",
-        cursor: "pointer",
-        border: "none",
-        borderRadius: 8,
-        padding: "0.55rem 1rem",
-        font: "inherit",
-        background: dark ? "#ffffff" : "#000000",
-        color: dark ? "#000000" : "#ffffff",
-    };
-}
+export const PrimaryButton = component$((props: {
+    type?: "button" | "submit";
+    disabled?: boolean;
+    compact?: boolean;
+    danger?: boolean;
+    onClick$?: QRL<() => void>;
+}) => {
+    // Flashing Colors When Opening Page:
+    // Button fill used to depend on usePrefersDark after first paint.
+    useStylesScoped$(`
+        .btn {
+            width: fit-content;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            padding: 0.55rem 1rem;
+            font: inherit;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+        .btn.compact {
+            padding: 0.3rem 0.65rem;
+        }
+        @media (prefers-color-scheme: light) {
+            .btn {
+                background: #000000;
+                color: #ffffff;
+            }
+            .btn.danger {
+                background: #b91c1c;
+                color: #ffffff;
+            }
+        }
+        @media (prefers-color-scheme: dark) {
+            .btn {
+                background: #ffffff;
+                color: #000000;
+            }
+            .btn.danger {
+                background: #7f1d1d;
+                color: #ffffff;
+            }
+        }
+        .force_scheme_to_light.btn {
+            background: #000000;
+            color: #ffffff;
+        }
+        .force_scheme_to_light.btn.danger {
+            background: #b91c1c;
+            color: #ffffff;
+        }
+        .force_scheme_to_dark.btn {
+            background: #ffffff;
+            color: #000000;
+        }
+        .force_scheme_to_dark.btn.danger {
+            background: #7f1d1d;
+            color: #ffffff;
+        }
+    `);
+    const classes = ["btn"];
+    if (props.compact) classes.push("compact");
+    if (props.danger) classes.push("danger");
+    return (
+        <button
+            class={classes.join(" ")}
+            type={props.type || "button"}
+            disabled={props.disabled}
+            onClick$={props.onClick$}
+        >
+            <Slot />
+        </button>
+    );
+});
 
 export const MarkdownField = component$((props: { text: Signal<string> }) => {
     const viewport = useViewport();

@@ -1,9 +1,8 @@
-import { $, component$, useSignal } from "@builder.io/qwik";
+import { $, component$, useSignal, useStylesScoped$ } from "@builder.io/qwik";
 import { Form, routeAction$, routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
 import { is_admin } from "~/utils/blog";
 import { InlineA } from "~/utils/components";
-import { usePrefersDark } from "~/utils/inline";
-import { fieldStyle, form_field, primaryButtonStyle } from "~/utils/markdown_editor";
+import { fieldStyle, form_field, PrimaryButton } from "~/utils/markdown_editor";
 import { delete_photo, list_photos, media_error, presign_upload } from "~/utils/media";
 
 export const use_photos = routeLoader$(async (event) => {
@@ -51,11 +50,30 @@ export default component$(() => {
     const loaded = use_photos();
     const presign = use_presign();
     const remove = use_delete_photo();
-    const dark = usePrefersDark();
     const status = useSignal("");
     const lastPath = useSignal("");
     const lastUrl = useSignal("");
     const fileInput = useSignal<HTMLInputElement>();
+
+    // Flashing Colors When Opening Page:
+    // Thumbnail placeholder used to wait on usePrefersDark.
+    useStylesScoped$(`
+        .thumb {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 6px;
+            display: block;
+        }
+        @media (prefers-color-scheme: light) {
+            .thumb { background: #f1f5f9; }
+        }
+        @media (prefers-color-scheme: dark) {
+            .thumb { background: #0f172a; }
+        }
+        .force_scheme_to_light.thumb { background: #f1f5f9; }
+        .force_scheme_to_dark.thumb { background: #0f172a; }
+    `);
 
     const upload = $(async () => {
         const input = fileInput.value;
@@ -116,9 +134,9 @@ export default component$(() => {
                     accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
                     style={fieldStyle}
                 />
-                <button type="button" onClick$={upload} style={primaryButtonStyle(dark.value)}>
+                <PrimaryButton type="button" onClick$={upload}>
                     Upload
-                </button>
+                </PrimaryButton>
             </div>
 
             {(status.value || lastPath.value) && (
@@ -127,17 +145,17 @@ export default component$(() => {
                     {lastPath.value && (
                         <p style={{ margin: 0 }}>
                             Path: <code>{lastPath.value}</code>{" "}
-                            <button type="button" onClick$={() => copy(lastPath.value)} style={{ ...primaryButtonStyle(dark.value), padding: "0.25rem 0.6rem" }}>
+                            <PrimaryButton type="button" compact onClick$={() => copy(lastPath.value)}>
                                 Copy path
-                            </button>
+                            </PrimaryButton>
                         </p>
                     )}
                     {lastUrl.value && (
                         <p style={{ margin: 0 }}>
                             URL: <InlineA href={lastUrl.value} target="_blank">{lastUrl.value}</InlineA>{" "}
-                            <button type="button" onClick$={() => copy(lastUrl.value)} style={{ ...primaryButtonStyle(dark.value), padding: "0.25rem 0.6rem" }}>
+                            <PrimaryButton type="button" compact onClick$={() => copy(lastUrl.value)}>
                                 Copy URL
-                            </button>
+                            </PrimaryButton>
                         </p>
                     )}
                 </div>
@@ -156,27 +174,23 @@ export default component$(() => {
                     {loaded.value.photos.map((photo) => (
                         <article key={photo.key} style={{ border: "1px solid currentColor", borderRadius: 8, padding: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                             <a href={photo.url} target="_blank" rel="noreferrer" style={{ display: "block" }}>
-                                <img
-                                    src={photo.url}
-                                    alt={photo.path}
-                                    style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: 6, display: "block", background: dark.value ? "#0f172a" : "#f1f5f9" }}
-                                />
+                                <img class="thumb" src={photo.url} alt={photo.path} />
                             </a>
                             <code style={{ fontSize: "0.85rem", wordBreak: "break-all" }}>{photo.path}</code>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-                                <button type="button" onClick$={() => copy(photo.path)} style={{ ...primaryButtonStyle(dark.value), padding: "0.3rem 0.65rem" }}>
+                                <PrimaryButton type="button" compact onClick$={() => copy(photo.path)}>
                                     Path
-                                </button>
-                                <button type="button" onClick$={() => copy(photo.url)} style={{ ...primaryButtonStyle(dark.value), padding: "0.3rem 0.65rem" }}>
+                                </PrimaryButton>
+                                <PrimaryButton type="button" compact onClick$={() => copy(photo.url)}>
                                     URL
-                                </button>
+                                </PrimaryButton>
                                 <InlineA href={photo.url} target="_blank">Open</InlineA>
                             </div>
                             <Form action={remove}>
                                 <input type="hidden" name="key" value={photo.key} />
-                                <button type="submit" disabled={remove.isRunning} style={{ ...primaryButtonStyle(dark.value), background: dark.value ? "#7f1d1d" : "#b91c1c", color: "#ffffff" }}>
+                                <PrimaryButton type="submit" danger disabled={remove.isRunning}>
                                     Delete
-                                </button>
+                                </PrimaryButton>
                             </Form>
                         </article>
                     ))}
