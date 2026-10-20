@@ -23,16 +23,16 @@ export default component$(() => {
         }
         @media (prefers-color-scheme: dark) {
             .root {
-                background: #1e293b;
+                background: #05060a;
                 color: #ffffff;
             }
         }
-        .force_scheme_to_light.root {
+        .force_scheme_to_light .root {
             background: #ffffff;
             color: #000000;
         }
-        .force_scheme_to_dark.root {
-            background: #1e293b;
+        .force_scheme_to_dark .root {
+            background: #05060a;
             color: #ffffff;
         }
     `);

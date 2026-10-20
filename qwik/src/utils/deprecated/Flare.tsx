@@ -1,3 +1,4 @@
+// Deprecated: replaced by GlobBlobs (from/ glob-blob). Do not import this.
 import { component$, useOnWindow, useSignal, useStylesScoped$, $ } from "@builder.io/qwik";
 import BgSelector from "~/../public/hov/selector.webp";
 import BgShades from "~/../public/hov/shades.png";
@@ -58,20 +59,20 @@ export const Flare = component$((props: { shift?: number }) => {
             .overlay { mix-blend-mode: overlay; }
             .fill { background: #000000; }
         }
-        .force_scheme_to_light.blend-root { mix-blend-mode: normal; }
-        .force_scheme_to_light.pattern {
+        .force_scheme_to_light .blend-root { mix-blend-mode: normal; }
+        .force_scheme_to_light .pattern {
             mix-blend-mode: normal;
             filter: none;
         }
-        .force_scheme_to_light.overlay { mix-blend-mode: multiply; }
-        .force_scheme_to_light.fill { background: #ffffff; }
-        .force_scheme_to_dark.blend-root { mix-blend-mode: exclusion; }
-        .force_scheme_to_dark.pattern {
+        .force_scheme_to_light .overlay { mix-blend-mode: multiply; }
+        .force_scheme_to_light .fill { background: #ffffff; }
+        .force_scheme_to_dark .blend-root { mix-blend-mode: exclusion; }
+        .force_scheme_to_dark .pattern {
             mix-blend-mode: difference;
             filter: invert(1);
         }
-        .force_scheme_to_dark.overlay { mix-blend-mode: overlay; }
-        .force_scheme_to_dark.fill { background: #000000; }
+        .force_scheme_to_dark .overlay { mix-blend-mode: overlay; }
+        .force_scheme_to_dark .fill { background: #000000; }
     `);
 
     useOnWindow(

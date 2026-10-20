@@ -24,12 +24,13 @@ export const ProjectSummary = component$((props: {
         @media (prefers-color-scheme: dark) {
             .summary { color: rgba(226, 232, 240, 0.8); }
         }
-        .force_scheme_to_light.summary { color: rgba(51, 65, 85, 0.8); }
-        .force_scheme_to_dark.summary { color: rgba(226, 232, 240, 0.8); }
+        .force_scheme_to_light .summary { color: rgba(51, 65, 85, 0.8); }
+        .force_scheme_to_dark .summary { color: rgba(226, 232, 240, 0.8); }
     `);
 
     return (
         <div>
+
             <div
                 role="link"
                 style={{
@@ -43,6 +44,7 @@ export const ProjectSummary = component$((props: {
                     <DisplayImage src={props.data.display_picture} ratio={66} />
                 </Link>
             </div>
+
             <Link
                 href={href}
                 style={{

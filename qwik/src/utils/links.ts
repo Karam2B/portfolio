@@ -10,7 +10,7 @@ export const links = [
     },
     {
         text: "Resume" as const,
-        href: "https://docs.google.com/document/d/183Y16BAD9LEBbe_eKvB0JbRpgaxE9xZ0VXy5f31Wews/",
+        href: "https://docs.google.com/document/d/1IYj2S0_3rv02Aj3KAv2p5dP-4r0lke9MxIVg1ETMtIM",
     },
     {
         text: "Github" as const,

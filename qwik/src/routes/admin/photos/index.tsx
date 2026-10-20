@@ -71,8 +71,8 @@ export default component$(() => {
         @media (prefers-color-scheme: dark) {
             .thumb { background: #0f172a; }
         }
-        .force_scheme_to_light.thumb { background: #f1f5f9; }
-        .force_scheme_to_dark.thumb { background: #0f172a; }
+        .force_scheme_to_light .thumb { background: #f1f5f9; }
+        .force_scheme_to_dark .thumb { background: #0f172a; }
     `);
 
     const upload = $(async () => {

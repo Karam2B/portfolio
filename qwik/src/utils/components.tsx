@@ -16,8 +16,8 @@ export const Separator = component$(() => {
         @media (prefers-color-scheme: dark) {
             .sep { background: rgba(255, 255, 255, 0.8); }
         }
-        .force_scheme_to_light.sep { background: rgba(0, 0, 0, 0.8); }
-        .force_scheme_to_dark.sep { background: rgba(255, 255, 255, 0.8); }
+        .force_scheme_to_light .sep { background: rgba(0, 0, 0, 0.8); }
+        .force_scheme_to_dark .sep { background: rgba(255, 255, 255, 0.8); }
     `);
     return <div class="sep" />;
 });
@@ -37,16 +37,16 @@ export const Base = component$(() => {
         }
         @media (prefers-color-scheme: dark) {
             .base {
-                background: #1e293b;
+                background: #05060a;
                 color: #ffffff;
             }
         }
-        .force_scheme_to_light.base {
+        .force_scheme_to_light .base {
             background: #ffffff;
             color: #000000;
         }
-        .force_scheme_to_dark.base {
-            background: #1e293b;
+        .force_scheme_to_dark .base {
+            background: #05060a;
             color: #ffffff;
         }
     `);
@@ -99,10 +99,10 @@ export const InlineA = component$((props: {
             .link { color: ${BLUE_DARK}; }
             .link:hover { color: ${BLUE}; }
         }
-        .force_scheme_to_light.link { color: ${BLUE}; }
-        .force_scheme_to_light.link:hover { color: ${BLUE_HOVER}; }
-        .force_scheme_to_dark.link { color: ${BLUE_DARK}; }
-        .force_scheme_to_dark.link:hover { color: ${BLUE}; }
+        .force_scheme_to_light .link { color: ${BLUE}; }
+        .force_scheme_to_light .link:hover { color: ${BLUE_HOVER}; }
+        .force_scheme_to_dark .link { color: ${BLUE_DARK}; }
+        .force_scheme_to_dark .link:hover { color: ${BLUE}; }
     `);
     return (
         <a
@@ -136,10 +136,10 @@ export const InlineLink = component$((props: { href: string; fontSize?: string |
             .link { color: ${BLUE_DARK}; }
             .link:hover { color: ${BLUE}; }
         }
-        .force_scheme_to_light.link { color: ${BLUE}; }
-        .force_scheme_to_light.link:hover { color: ${BLUE_HOVER}; }
-        .force_scheme_to_dark.link { color: ${BLUE_DARK}; }
-        .force_scheme_to_dark.link:hover { color: ${BLUE}; }
+        .force_scheme_to_light .link { color: ${BLUE}; }
+        .force_scheme_to_light .link:hover { color: ${BLUE_HOVER}; }
+        .force_scheme_to_dark .link { color: ${BLUE_DARK}; }
+        .force_scheme_to_dark .link:hover { color: ${BLUE}; }
     `);
     return (
         <Link
@@ -154,37 +154,33 @@ export const InlineLink = component$((props: { href: string; fontSize?: string |
 
 export const DisplayImage = component$((props: { src?: string | null; ratio?: number }) => {
     const ratio = props.ratio || 66;
+    const hasSrc = !!props.src;
+    const src = hasSrc
+        ? String(import.meta.env.PUBLIC_MEDIA_BUCKET_DOMAIN) + "/raw" + props.src
+        : "/noPreview.svg";
     return (
         <div style={{ borderRadius: 12 }}>
             <div style={{ position: "relative", width: "100%", height: 0, paddingBottom: `${ratio}%` }}>
                 <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0 }}>
-                    {!props.src ? (
-                        <img
-                            src="/noPreview.svg"
-                            alt="Display Image"
-                            style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "contain",
-                                background: "#ffffff",
-                                borderRadius: 12,
-                                padding: "1.25rem",
-                                boxSizing: "border-box",
-                            }}
-                        />
-                    ) : (
-                        <img
-                            src={import.meta.env.PUBLIC_MEDIA_BUCKET_DOMAIN + "/raw" + props.src}
-                            alt="Display Image"
-                            style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                borderRadius: 12,
-                                display: "block",
-                            }}
-                        />
-                    )}
+                    <img
+                        src={src}
+                        alt="Display Image"
+                        style={hasSrc ? {
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            borderRadius: 12,
+                            display: "block",
+                        } : {
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            background: "#ffffff",
+                            borderRadius: 12,
+                            padding: "1.25rem",
+                            boxSizing: "border-box",
+                        }}
+                    />
                 </div>
             </div>
         </div>

@@ -58,19 +58,19 @@ export const PrimaryButton = component$((props: {
                 color: #ffffff;
             }
         }
-        .force_scheme_to_light.btn {
+        .force_scheme_to_light .btn {
             background: #000000;
             color: #ffffff;
         }
-        .force_scheme_to_light.btn.danger {
+        .force_scheme_to_light .btn.danger {
             background: #b91c1c;
             color: #ffffff;
         }
-        .force_scheme_to_dark.btn {
+        .force_scheme_to_dark .btn {
             background: #ffffff;
             color: #000000;
         }
-        .force_scheme_to_dark.btn.danger {
+        .force_scheme_to_dark .btn.danger {
             background: #7f1d1d;
             color: #ffffff;
         }

@@ -5,7 +5,7 @@ import { InlineA, InlineLink, MainGrid, Separator } from "~/utils/components";
 import { LinkAsA } from "./link/[link]";
 import { ProjectSummary } from "~/utils/endpoint_view";
 import { links } from "~/utils/links";
-import { Flare } from "~/utils/Flare";
+import { GlobBlobs } from "~/utils/blobs";
 import { use_server_projects_2 } from "~/utils/endpoint_2";
 import { useViewport } from "~/utils/inline";
 
@@ -20,12 +20,13 @@ export default component$(() => {
 
     return (
         <IndexStructure>
-            <div q:slot="main">
+            <div q:slot="hero">
                 <Intro>
                     <span q:slot="h1">Hi 👋, My Name is Karam</span>
                     <span q:slot="h2">I'm full-stack developer based in the bay area</span>
                 </Intro>
-
+            </div>
+            <div q:slot="main">
                 <AboutMe>
                     <div q:slot="main">
                         <p style={aboutParagraph}>
@@ -49,7 +50,7 @@ export default component$(() => {
                         </LinkAsA>
                     </div>
                 </AboutMe>
-                {/* <Projects /> */}
+                <Projects />
                 <ContactMe >
                     <span q:slot="message" >
                         I'm currently looking for jobs, you can say hi any time
@@ -57,8 +58,8 @@ export default component$(() => {
                 </ContactMe>
             </div>
             <div q:slot="footer">
-                Built with Typescript🛡️⚙️, Qwik🏃💨, SQL, and Rust ⚙️🦀 | checkout the code on{" "}
-                <InlineA href="https://github.com/karambarakat/myportfolio">
+                Built with with love by Karam | checkout the code on{" "}
+                <InlineA href="https://github.com/Karam2B/portfolio">
                     Github
                 </InlineA>
             </div>
@@ -80,9 +81,14 @@ const IndexStructure = component$(() => {
     return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <div style={{ flex: 1 }}>
-                <Flare />
+                {/* Hero text lives inside GlobBlobs canvas so backdrop-filter glass can blur it. */}
+                <div style={{ position: "relative", height: "100svh", overflow: "hidden" }}>
+                    <GlobBlobs parallax>
+                        <Slot name="hero" />
+                    </GlobBlobs>
+                </div>
                 <Scroll />
-                <div style={{ isolation: "isolate" }}>
+                <div>
                     <Slot name="main" />
                 </div>
             </div>
@@ -121,11 +127,11 @@ const Scroll = component$(() => {
                 stroke: #ffffff;
             }
         }
-        .force_scheme_to_light.icon {
+        .force_scheme_to_light .icon {
             fill: #000000;
             stroke: #000000;
         }
-        .force_scheme_to_dark.icon {
+        .force_scheme_to_dark .icon {
             fill: #ffffff;
             stroke: #ffffff;
         }
@@ -154,6 +160,7 @@ const Scroll = component$(() => {
                 display: "flex",
                 justifyContent: "center",
                 paddingTop: 30,
+                zIndex: 4,
             }}
         >
             <ScrollIcon
@@ -168,52 +175,23 @@ const Scroll = component$(() => {
 });
 
 const Intro = component$(() => {
-    const shift = useSignal(0);
-
+    // Parallax is handled by GlobBlobs (hero sits inside its canvas for backdrop-filter).
     return (
-        <div
-            window:onScroll$={(_, target) => {
-                const { y } = target.getBoundingClientRect();
-                const scrollTop = window.document.documentElement.scrollTop;
-                const val = (scrollTop - y) / window.innerHeight;
-                if (val > 0.5) return;
-                shift.value = val;
-            }}
-        >
-            <div
+        <div style={{ padding: "0.5rem" }}>
+            <h1 style={{ fontSize: "3rem", lineHeight: 1, fontWeight: 400, paddingBottom: "0.75rem", margin: 0 }}>
+                <Slot name="h1" />
+            </h1>
+            <h2
                 style={{
-                    height: "100vh",
-                    transition: "transform 0.2s ease-out",
-                    transform: `translateY(${shift.value * -100}%)`,
+                    fontWeight: 300,
+                    fontSize: "1.875rem",
+                    lineHeight: "2.25rem",
+                    paddingBottom: "0.75rem",
+                    margin: "0 0 2rem",
                 }}
             >
-                <div
-                    style={{
-                        height: "100%",
-                        padding: "0.5rem",
-                        textAlign: "center",
-                        display: "grid",
-                        placeItems: "center",
-                        placeContent: "center",
-                        position: "relative",
-                    }}
-                >
-                    <h1 style={{ fontSize: "3rem", lineHeight: 1, fontWeight: 400, paddingBottom: "0.75rem", margin: 0 }}>
-                        <Slot name="h1" />
-                    </h1>
-                    <h2
-                        style={{
-                            fontWeight: 300,
-                            fontSize: "1.875rem",
-                            lineHeight: "2.25rem",
-                            paddingBottom: "0.75rem",
-                            margin: "0 0 2rem",
-                        }}
-                    >
-                        <Slot name="h2" />
-                    </h2>
-                </div>
-            </div>
+                <Slot name="h2" />
+            </h2>
         </div>
     );
 });
@@ -262,8 +240,8 @@ const AnimatedLine = component$(() => {
         @media (prefers-color-scheme: dark) {
             .draw-path { stroke: #ffffff; }
         }
-        .force_scheme_to_light.draw-path { stroke: #000000; }
-        .force_scheme_to_dark.draw-path { stroke: #ffffff; }
+        .force_scheme_to_light .draw-path { stroke: #000000; }
+        .force_scheme_to_dark .draw-path { stroke: #ffffff; }
     `);
 
     return (
