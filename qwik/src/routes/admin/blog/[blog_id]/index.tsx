@@ -1,7 +1,7 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { Form, routeAction$, routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
 import * as v from "valibot";
-import { edit_blog_schema, is_admin, one_blog, update_blog } from "~/utils/blog";
+import { delete_blog, edit_blog_schema, is_admin, one_blog, update_blog } from "~/utils/blog";
 import { InlineA } from "~/utils/components";
 import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, PrimaryButton, save_error } from "~/utils/markdown_editor";
 
@@ -29,9 +29,20 @@ export const use_update_blog = routeAction$(async (data, event) => {
     }
 });
 
+export const use_delete_blog = routeAction$(async (_data, event) => {
+    if (!is_admin(event)) return { ok: false as const, message: "Sign in to delete." };
+    try {
+        await delete_blog(event.env, Number(event.params.blog_id));
+    } catch (error) {
+        return { ok: false as const, message: save_error(error, "delete") };
+    }
+    throw event.redirect(302, "/admin/blog");
+});
+
 export default component$(() => {
     const loaded = use_admin_blog();
     const action = use_update_blog();
+    const remove = use_delete_blog();
     const post = loaded.value.found === "some" ? loaded.value.value : null;
     const title = useSignal(post?.title ?? "");
     const summary = useSignal(post?.summary ?? "");
@@ -42,32 +53,41 @@ export default component$(() => {
     }
 
     return (
-        <Form action={action} style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
-            <h1 style={{ fontSize: "2rem", fontWeight: 400, margin: 0 }}>Edit post</h1>
-            <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                Title
-                <input name="title" type="text" required bind:value={title} style={fieldStyle} />
-            </label>
-            <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                Summary
-                <input name="summary" type="text" required bind:value={summary} style={fieldStyle} />
-            </label>
-            <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                Created at
-                <input name="created_at" type="text" required bind:value={createdAt} style={fieldStyle} />
-            </label>
-            <CheckField name="published" label="Published" checked={post.published} />
-            <ContentDraft initial={post.content} />
-            <PrimaryButton type="submit" disabled={action.isRunning}>
-                {action.isRunning ? "Saving…" : "Save"}
-            </PrimaryButton>
-            {action.value && (
-                <p style={{ margin: 0 }}>
-                    {action.value.message}{" "}
-                    {action.value.ok && action.value.published && <InlineA href={"/blog/" + post.id}>View post</InlineA>}
-                </p>
-            )}
-        </Form>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <Form action={action} style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+                <h1 style={{ fontSize: "2rem", fontWeight: 400, margin: 0 }}>Edit post</h1>
+                <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                    Title
+                    <input name="title" type="text" required bind:value={title} style={fieldStyle} />
+                </label>
+                <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                    Summary
+                    <input name="summary" type="text" required bind:value={summary} style={fieldStyle} />
+                </label>
+                <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                    Created at
+                    <input name="created_at" type="text" required bind:value={createdAt} style={fieldStyle} />
+                </label>
+                <CheckField name="published" label="Published" checked={post.published} />
+                <ContentDraft initial={post.content} />
+                <PrimaryButton type="submit" disabled={action.isRunning}>
+                    {action.isRunning ? "Saving…" : "Save"}
+                </PrimaryButton>
+                {action.value && (
+                    <p style={{ margin: 0 }}>
+                        {action.value.message}{" "}
+                        {action.value.ok && action.value.published && <InlineA href={"/blog/" + post.id}>View post</InlineA>}
+                    </p>
+                )}
+            </Form>
+
+            <Form action={remove} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <PrimaryButton type="submit" danger disabled={remove.isRunning}>
+                    {remove.isRunning ? "Deleting…" : "Delete post"}
+                </PrimaryButton>
+                {remove.value && !remove.value.ok && <p style={{ margin: 0 }}>{remove.value.message}</p>}
+            </Form>
+        </div>
     );
 });
 

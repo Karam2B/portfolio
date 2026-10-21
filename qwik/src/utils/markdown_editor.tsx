@@ -116,13 +116,13 @@ export const MarkdownField = component$((props: { text: Signal<string> }) => {
     );
 });
 
-export function save_error(error: unknown) {
+export function save_error(error: unknown, verb = "save") {
     console.error(error);
     if (error instanceof Error && error.message === "database is not configured") {
         return "The database is not configured for writing.";
     }
     if (error instanceof Error && error.message === "not found") return "That record was not found.";
-    return "Could not save.";
+    return `Could not ${verb}.`;
 }
 
 export function form_field(value: unknown) {

@@ -7,7 +7,8 @@ export default component$(() => {
             <h1 style={{ fontSize: "2rem", fontWeight: 400, margin: 0 }}>Admin</h1>
             <InlineLink href="/admin/blog/new">New blog post</InlineLink>
             <InlineLink href="/admin/blog">Edit blog posts</InlineLink>
-            <InlineLink href="/admin/projects">Edit project bodies</InlineLink>
+            <InlineLink href="/admin/projects/new">New project</InlineLink>
+            <InlineLink href="/admin/projects">Edit projects</InlineLink>
             <InlineLink href="/admin/photos">Photos</InlineLink>
             <InlineA href="https://vercel.com/karam-barakats-projects/portfolio" target="_blank">Vercel Deploy</InlineA>
         </div>

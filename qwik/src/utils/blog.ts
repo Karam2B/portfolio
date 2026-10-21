@@ -152,3 +152,14 @@ export async function update_blog(env: EnvGetter, id: number, input: v.InferOutp
         throw new Error("not found");
     }
 }
+
+export async function delete_blog(env: EnvGetter, id: number) {
+    const client = write_client(env);
+    const written = await client.execute({
+        sql: `DELETE FROM Blog WHERE id = ?`,
+        args: [id],
+    });
+    if (Number(written.rowsAffected) === 0) {
+        throw new Error("not found");
+    }
+}

@@ -1,4 +1,3 @@
-import { Client, createClient, Row } from "@libsql/client"
 import * as v from "valibot"
 import { Collections, non_nullable_for_falsies, nullable_for_falsies, RelationSpec } from "./lib";
 
@@ -11,32 +10,12 @@ const project_schema = v.object({
     live_link: nullable_for_falsies(v.string()),
     created_at: v.pipe(v.string(), v.isoTimestamp()),
     display_picture: nullable_for_falsies(v.string()),
+    skills: nullable_for_falsies(v.string()),
 });
-const skill_schema = v.strictObject({ title: non_nullable_for_falsies(v.string()) });
 
 export const links = {
     "relation": (self: { from: string, to: string }, { by_id }: { by_id: number }) => {
-        if (self.from === "project" && self.to === "skill") {
-            return {
-                select_one: async (client: Client) => {
-                    let res = await client.execute({
-                        sql: `
-                            SELECT l.id, l.title FROM Project p
-                            LEFT JOIN ProjectSkill ps ON ps.project_id = p.id
-                            LEFT JOIN Skill s ON ps.skill_id = s.id
-                            WHERE p_id = ?;
-                        `, args: [by_id]
-                    })
-
-                    // many_to_many
-                    return v.parse(v.array(skill_schema), res.rows)
-                }
-            }
-        } else if (self.from === "skill" && self.to === "project") {
-            throw new Error("todo")
-        } else {
-            throw new Error("must a bug in typescript")
-        }
+        throw new Error("no relations defined")
     },
 } as const satisfies Record<string, RelationSpec>
 
@@ -53,15 +32,11 @@ export const collections = {
              github_link as github_link,
              live_link as live_link,
              created_at as created_at,
-             display_picture as display_picture
+             display_picture as display_picture,
+             skills as skills
          FROM Project
          WHERE id = ?;
         ` },
-        relation: { skill: v.array(skill_schema) }
-    },
-    skill: {
-        schema: skill_schema,
-        select: (by_id) => { return "" },
-        relation: { project: v.array(project_schema) }
+        relation: {}
     },
 } as const satisfies Collections
