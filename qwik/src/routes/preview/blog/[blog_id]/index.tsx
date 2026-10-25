@@ -5,7 +5,7 @@ import { one_blog } from "~/utils/blog";
 import { get_marked_engine, Marked } from "~/utils/marked_down";
 
 export const use_preview_blog = routeLoader$(async (event) => {
-    const post = await one_blog(event.env, Number(event.params.blog_id));
+    const post = await one_blog(event.env, event.params.blog_id);
     if (post.found === "none") {
         event.status(404);
     }

@@ -7,14 +7,15 @@ import { delete_project, one_project_2, project_edit_schema, update_project } fr
 import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, PrimaryButton, save_error } from "~/utils/markdown_editor";
 
 export const use_admin_project = routeLoader$(async (event) => {
-    const project = await one_project_2(event, Number(event.params.project_id), true);
+    const project = await one_project_2(event, event.params.project_id, true);
     if (project.found === "none") event.status(404);
     return project;
 });
 
 export const use_update_project = routeAction$(async (data, event) => {
-    if (!is_admin(event)) return { ok: false as const, message: "Sign in to save.", published: false };
+    if (!is_admin(event)) return { ok: false as const, message: "Sign in to save.", published: false, snake_case_id: "" };
     const parsed = v.safeParse(project_edit_schema, {
+        snake_case_id: form_field(data.snake_case_id),
         title: form_field(data.title),
         summary: form_field(data.summary),
         content: form_field(data.content),
@@ -26,16 +27,17 @@ export const use_update_project = routeAction$(async (data, event) => {
         published: form_bool(data.published),
         skills: form_field(data.skills),
     });
-    if (!parsed.success) return { ok: false as const, message: "Add a title and a summary.", published: false };
+    if (!parsed.success) return { ok: false as const, message: "Add a snake_case_id, title, and summary.", published: false, snake_case_id: "" };
     try {
         await update_project(event.env, Number(event.params.project_id), parsed.output);
         return {
             ok: true as const,
             message: parsed.output.published ? "Saved." : "Saved. This project is hidden from the site.",
             published: parsed.output.published,
+            snake_case_id: parsed.output.snake_case_id,
         };
     } catch (error) {
-        return { ok: false as const, message: save_error(error), published: false };
+        return { ok: false as const, message: save_error(error), published: false, snake_case_id: "" };
     }
 });
 
@@ -54,6 +56,7 @@ export default component$(() => {
     const action = use_update_project();
     const remove = use_delete_project();
     const project = loaded.value.found === "some" ? loaded.value.value : null;
+    const snakeCaseId = useSignal(project?.snake_case_id ?? "");
     const title = useSignal(project?.title ?? "");
     const summary = useSignal(project?.summary ?? "");
     const github = useSignal(project?.github_link ?? "");
@@ -66,10 +69,16 @@ export default component$(() => {
         return <h1 style={{ fontSize: "2rem", fontWeight: 400, margin: 0 }}>Project not found</h1>;
     }
 
+    const viewSlug = action.value?.ok && action.value.snake_case_id ? action.value.snake_case_id : project.snake_case_id;
+
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             <Form action={action} style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
                 <h1 style={{ fontSize: "2rem", fontWeight: 400, margin: 0 }}>Edit project</h1>
+                <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                    snake_case_id
+                    <input name="snake_case_id" type="text" required bind:value={snakeCaseId} style={fieldStyle} />
+                </label>
                 <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                     Title
                     <input name="title" type="text" required bind:value={title} style={fieldStyle} />
@@ -94,6 +103,7 @@ export default component$(() => {
                     Created at
                     <input name="created_at" type="text" required bind:value={createdAt} style={fieldStyle} />
                 </label>
+                <p style={{ margin: 0, opacity: 0.7 }}>Updated at {project.updated_at}</p>
                 <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                     Skills
                     <input name="skills" type="text" bind:value={skills} style={fieldStyle} />
@@ -107,7 +117,7 @@ export default component$(() => {
                 {action.value && (
                     <p style={{ margin: 0 }}>
                         {action.value.message}{" "}
-                        {action.value.ok && action.value.published && <InlineA href={"/projects/" + project.id}>View project</InlineA>}
+                        {action.value.ok && action.value.published && <InlineA href={"/projects/" + viewSlug}>View project</InlineA>}
                     </p>
                 )}
             </Form>

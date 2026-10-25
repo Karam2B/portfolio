@@ -6,7 +6,7 @@ import { BlogFrame } from "~/utils/blog_view";
 import { get_marked_engine, Marked } from "~/utils/marked_down";
 
 export const use_blog = routeLoader$(async (event) => {
-    const post = await one_blog(event.env, Number(event.params.blog_id));
+    const post = await one_blog(event.env, event.params.blog_id);
     if (post.found === "none") {
         event.status(404);
     }
@@ -51,5 +51,5 @@ export const head: DocumentHead = ({ resolveValue }) => {
 
 export const onStaticGenerate: StaticGenerateHandler = async ({ env }) => {
     const posts = await list_blogs(env);
-    return { params: posts.map((post) => ({ blog_id: post.id })) };
+    return { params: posts.map((post) => ({ blog_id: post.snake_case_id })) };
 };

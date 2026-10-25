@@ -8,9 +8,10 @@ import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, PrimaryBut
 
 export const use_create_project = routeAction$(async (data, event) => {
     if (!is_admin(event)) {
-        return { ok: false as const, message: "Sign in to create.", id: "", published: false };
+        return { ok: false as const, message: "Sign in to create.", id: "", snake_case_id: "", published: false };
     }
     const parsed = v.safeParse(project_create_schema, {
+        snake_case_id: form_field(data.snake_case_id),
         title: form_field(data.title),
         summary: form_field(data.summary),
         content: form_field(data.content),
@@ -22,18 +23,19 @@ export const use_create_project = routeAction$(async (data, event) => {
         skills: form_field(data.skills),
     });
     if (!parsed.success) {
-        return { ok: false as const, message: "Add a title and a summary.", id: "", published: false };
+        return { ok: false as const, message: "Add a snake_case_id, title, and summary.", id: "", snake_case_id: "", published: false };
     }
     try {
-        const id = await create_project(event.env, parsed.output);
+        const created = await create_project(event.env, parsed.output);
         return {
             ok: true as const,
             message: parsed.output.published ? "Created." : "Created. This project is hidden from the site.",
-            id,
+            id: created.id,
+            snake_case_id: created.snake_case_id,
             published: parsed.output.published,
         };
     } catch (error) {
-        return { ok: false as const, message: save_error(error, "create"), id: "", published: false };
+        return { ok: false as const, message: save_error(error, "create"), id: "", snake_case_id: "", published: false };
     }
 });
 
@@ -43,6 +45,10 @@ export default component$(() => {
     return (
         <Form action={action} style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
             <h1 style={{ fontSize: "2rem", fontWeight: 400, margin: 0 }}>New project</h1>
+            <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                snake_case_id
+                <input name="snake_case_id" type="text" required placeholder="my_cool_project" style={fieldStyle} />
+            </label>
             <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                 Title
                 <input name="title" type="text" required style={fieldStyle} />
@@ -82,7 +88,7 @@ export default component$(() => {
                             {action.value.published && (
                                 <>
                                     {" · "}
-                                    <InlineA href={"/projects/" + action.value.id}>View</InlineA>
+                                    <InlineA href={"/projects/" + action.value.snake_case_id}>View</InlineA>
                                 </>
                             )}
                         </>

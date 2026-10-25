@@ -9,8 +9,7 @@ import { one_project_2, all_projects_ids } from "~/utils/endpoint_2";
 import { get_marked_engine, Marked } from "~/utils/marked_down";
 
 export const use_project = routeLoader$(async (event) => {
-    const id = event.params.project_id;
-    let s = await one_project_2(event, Number(id));
+    let s = await one_project_2(event, event.params.project_id);
     if (s.found === "none") {
         event.status(404);
     }
@@ -95,7 +94,7 @@ export default component$(() => {
 
 export const onStaticGenerate: StaticGenerateHandler = async function ({ env }) {
     let params = await all_projects_ids(env)
-    return { params: params.map((e) => ({ project_id: e.id.toString() })) }
+    return { params: params.map((e) => ({ project_id: e.snake_case_id })) }
 }
 function sanitizeHtml(arg0: any, arg1: { allowedTags: string[]; allowedAttributes: { a: string[]; img: string[]; }; }): string {
     throw new Error("Function not implemented.");

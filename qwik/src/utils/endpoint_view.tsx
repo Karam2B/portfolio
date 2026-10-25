@@ -10,7 +10,7 @@ export const ProjectSummary = component$((props: {
     data: Omit<v.InferOutput<typeof project_schema>, "content">;
     href?: string;
 }) => {
-    const href = props.href ?? "/projects/" + props.data.id;
+    const href = props.href ?? "/projects/" + props.data.snake_case_id;
 
     // Flashing Colors When Opening Page:
     // Summary text contrast used to wait on usePrefersDark.

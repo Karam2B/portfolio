@@ -122,6 +122,9 @@ export function save_error(error: unknown, verb = "save") {
         return "The database is not configured for writing.";
     }
     if (error instanceof Error && error.message === "not found") return "That record was not found.";
+    if (error instanceof Error && /unique constraint failed/i.test(error.message) && /snake_case_id/i.test(error.message)) {
+        return "That snake_case_id is already taken.";
+    }
     return `Could not ${verb}.`;
 }
 

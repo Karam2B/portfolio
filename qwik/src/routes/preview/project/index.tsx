@@ -15,7 +15,7 @@ export default component$(() => {
             <h1 style={{ fontSize: "2.25rem", lineHeight: "2.5rem", fontWeight: 400, textAlign: "center", margin: "1.75rem 0" }}>Projects</h1>
             <MainGrid>
                 {projects.value.map((project) => (
-                    <ProjectSummary key={project.id} data={project} href={"/preview/project/" + project.id} />
+                    <ProjectSummary key={project.id} data={project} href={"/preview/project/" + project.snake_case_id} />
                 ))}
             </MainGrid>
         </div>

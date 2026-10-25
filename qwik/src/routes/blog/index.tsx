@@ -30,7 +30,7 @@ export default component$(() => {
                 <div>
                     {blogs.value.map((post) => (
                         <article key={post.id} style={{ padding: "1rem 0", borderTop: "1px solid currentColor" }}>
-                            <InlineLink href={"/blog/" + post.id} fontSize="1.5rem">
+                            <InlineLink href={"/blog/" + post.snake_case_id} fontSize="1.5rem">
                                 {post.title}
                             </InlineLink>
                             <p style={{ margin: "0.35rem 0 0", opacity: 0.7 }}>

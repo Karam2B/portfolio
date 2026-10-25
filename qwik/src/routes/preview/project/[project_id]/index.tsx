@@ -9,7 +9,7 @@ import { one_project_2 } from "~/utils/endpoint_2";
 import { get_marked_engine, Marked } from "~/utils/marked_down";
 
 export const use_preview_project = routeLoader$(async (event) => {
-    const project = await one_project_2(event, Number(event.params.project_id));
+    const project = await one_project_2(event, event.params.project_id);
     if (project.found === "none") {
         event.status(404);
     }
