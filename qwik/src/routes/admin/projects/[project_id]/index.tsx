@@ -1,13 +1,17 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { Form, routeAction$, routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
 import * as v from "valibot";
-import { InlineA } from "~/utils/components";
-import { is_admin } from "~/utils/blog";
-import { delete_project, one_project_2, project_edit_schema, update_project } from "~/utils/endpoint_2";
-import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, PrimaryButton, save_error } from "~/utils/markdown_editor";
+import { ContentDraft } from "~/components/markdown/markdown_editor";
+import { CheckField, fieldStyle } from "~/components/ui/form_fields";
+import { InlineA } from "~/components/ui/inline_link";
+import { PrimaryButton } from "~/components/ui/primary_button";
+import { form_bool, form_field } from "~/lib/form_data";
+import { is_admin } from "~/server/auth";
+import { save_error } from "~/server/db/errors";
+import { delete_project, one_project, project_edit_schema, update_project } from "~/server/db/projects";
 
 export const use_admin_project = routeLoader$(async (event) => {
-    const project = await one_project_2(event, event.params.project_id, true);
+    const project = await one_project(event.env, event.params.project_id, true);
     if (project.found === "none") event.status(404);
     return project;
 });

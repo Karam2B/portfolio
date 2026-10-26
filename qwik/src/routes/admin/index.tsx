@@ -1,5 +1,5 @@
 import { component$ } from "@builder.io/qwik";
-import { InlineA, InlineLink } from "~/utils/components";
+import { InlineA, InlineLink } from "~/components/ui/inline_link";
 
 export default component$(() => {
     return (

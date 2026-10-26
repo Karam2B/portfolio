@@ -1,10 +1,10 @@
 import { component$ } from "@builder.io/qwik";
 import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
-import { InlineLink } from "~/utils/components";
-import { use_server_projects_2 } from "~/utils/endpoint_2";
+import { InlineLink } from "~/components/ui/inline_link";
+import { list_projects } from "~/server/db/projects";
 
 export const use_admin_projects = routeLoader$(async (event) => {
-    return await use_server_projects_2(event, true);
+    return await list_projects(event.env, true);
 });
 
 export default component$(() => {

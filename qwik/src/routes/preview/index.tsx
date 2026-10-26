@@ -1,6 +1,6 @@
 import { component$ } from "@builder.io/qwik";
 import { type DocumentHead } from "@builder.io/qwik-city";
-import { InlineLink } from "~/utils/components";
+import { InlineLink } from "~/components/ui/inline_link";
 
 export default component$(() => {
     return (

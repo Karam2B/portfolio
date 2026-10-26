@@ -1,9 +1,11 @@
 import { $, component$, useSignal, useStylesScoped$ } from "@builder.io/qwik";
 import { Form, routeAction$, routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
-import { is_admin } from "~/utils/blog";
-import { InlineA } from "~/utils/components";
-import { fieldStyle, form_field, PrimaryButton } from "~/utils/markdown_editor";
-import { delete_photo, list_photos, media_error, presign_upload } from "~/utils/media";
+import { fieldStyle } from "~/components/ui/form_fields";
+import { InlineA } from "~/components/ui/inline_link";
+import { PrimaryButton } from "~/components/ui/primary_button";
+import { form_field } from "~/lib/form_data";
+import { is_admin } from "~/server/auth";
+import { delete_photo, list_photos, media_error, presign_upload } from "~/server/media";
 
 export const use_photos = routeLoader$(async (event) => {
     if (!is_admin(event)) return { ok: false as const, photos: [], message: "Sign in to manage photos." };

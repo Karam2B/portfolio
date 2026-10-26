@@ -1,13 +1,13 @@
 import { component$, useSignal } from "@builder.io/qwik"
-import { get_marked_engine, Marked } from "~/utils/marked_down";
+import { lex_markdown } from "~/components/markdown/engine";
+import { Marked } from "~/components/markdown/marked";
 
 export default component$(() => {
-    let s = useSignal(() => {
-        let m = get_marked_engine();
-        return m.lexer(`
+    const s = useSignal(() => {
+        return lex_markdown(`
 > hello *world*
-            `)
-    })
+            `);
+    });
     return <div>
         <Marked content={s.value} nesting_level={0} />
         <pre style={{ overflowX: "auto" }}>

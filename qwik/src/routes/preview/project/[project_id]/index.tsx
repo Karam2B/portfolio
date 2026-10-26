@@ -1,15 +1,17 @@
 import { component$, useComputed$ } from "@builder.io/qwik";
 import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
 import { MoChevronRight } from "@qwikest/icons/monoicons";
-import { DateTime } from "luxon";
 import Github from "~/../public/github.svg?jsx";
 import Live from "~/../public/live.svg?jsx";
-import { DisplayImage, InlineA } from "~/utils/components";
-import { one_project_2 } from "~/utils/endpoint_2";
-import { get_marked_engine, Marked } from "~/utils/marked_down";
+import { lex_markdown } from "~/components/markdown/engine";
+import { Marked } from "~/components/markdown/marked";
+import { DisplayImage } from "~/components/ui/display_image";
+import { InlineA } from "~/components/ui/inline_link";
+import { format_date } from "~/lib/format_date";
+import { one_project } from "~/server/db/projects";
 
 export const use_preview_project = routeLoader$(async (event) => {
-    const project = await one_project_2(event, event.params.project_id);
+    const project = await one_project(event.env, event.params.project_id);
     if (project.found === "none") {
         event.status(404);
     }
@@ -20,7 +22,7 @@ export default component$(() => {
     const project = use_preview_project();
     const tokens = useComputed$(() => {
         const content = project.value.found === "some" ? project.value.value.content : "";
-        return get_marked_engine().lexer(content.replace(/\\n/g, "\n"));
+        return lex_markdown(content);
     });
 
     if (project.value.found === "none") {
@@ -52,7 +54,7 @@ export default component$(() => {
             <h1 style={{ fontSize: "1.875rem", lineHeight: "2.25rem", fontWeight: 400, margin: 0 }}>{value.title}</h1>
             <p style={{ margin: 0, opacity: 0.7 }}>
                 created at{" "}
-                <time>{DateTime.fromISO(value.created_at).toFormat("LLL dd yyyy")}</time>
+                <time>{format_date(value.created_at)}</time>
             </p>
             <div style={{ display: "flex", gap: "0.75rem" }}>
                 {value.github_link && (

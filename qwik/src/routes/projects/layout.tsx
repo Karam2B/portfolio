@@ -1,3 +1,5 @@
+/** Full-height wrapper for `/projects` and `/projects/:id`. */
+
 import { Slot, component$ } from "@builder.io/qwik";
 
 export default component$(() => {

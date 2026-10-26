@@ -1,9 +1,14 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { Form, routeAction$, routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
 import * as v from "valibot";
-import { delete_blog, edit_blog_schema, is_admin, one_blog, update_blog } from "~/utils/blog";
-import { InlineA } from "~/utils/components";
-import { CheckField, ContentDraft, fieldStyle, form_bool, form_field, PrimaryButton, save_error } from "~/utils/markdown_editor";
+import { ContentDraft } from "~/components/markdown/markdown_editor";
+import { CheckField, fieldStyle } from "~/components/ui/form_fields";
+import { InlineA } from "~/components/ui/inline_link";
+import { PrimaryButton } from "~/components/ui/primary_button";
+import { form_bool, form_field } from "~/lib/form_data";
+import { is_admin } from "~/server/auth";
+import { blog_edit_schema, delete_blog, one_blog, update_blog } from "~/server/db/blogs";
+import { save_error } from "~/server/db/errors";
 
 export const use_admin_blog = routeLoader$(async (event) => {
     const post = await one_blog(event.env, event.params.blog_id, true);
@@ -13,7 +18,7 @@ export const use_admin_blog = routeLoader$(async (event) => {
 
 export const use_update_blog = routeAction$(async (data, event) => {
     if (!is_admin(event)) return { ok: false as const, message: "Sign in to save.", published: false };
-    const parsed = v.safeParse(edit_blog_schema, {
+    const parsed = v.safeParse(blog_edit_schema, {
         snake_case_id: form_field(data.snake_case_id),
         title: form_field(data.title),
         summary: form_field(data.summary),

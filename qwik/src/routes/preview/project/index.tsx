@@ -1,11 +1,11 @@
 import { component$ } from "@builder.io/qwik";
 import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
-import { use_server_projects_2 } from "~/utils/endpoint_2";
-import { ProjectSummary } from "~/utils/endpoint_view";
-import { MainGrid } from "~/utils/components";
+import { MainGrid } from "~/components/layout/main_grid";
+import { ProjectSummary } from "~/components/project/project_card";
+import { list_projects } from "~/server/db/projects";
 
 export const use_preview_projects = routeLoader$(async (event) => {
-    return await use_server_projects_2(event);
+    return await list_projects(event.env);
 });
 
 export default component$(() => {

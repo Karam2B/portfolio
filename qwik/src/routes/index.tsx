@@ -1,13 +1,20 @@
+/**
+ * Home page. Layout pieces below (`IndexStructure`, `Intro`, …) are local to
+ * this route. Reusable cards and blobs live under `~/components`.
+ */
+
 import { $, Slot, component$, useOnWindow, useSignal, useStylesScoped$, useVisibleTask$ } from "@builder.io/qwik";
 import ScrollIcon from "~/../public/scroll.svg?jsx";
 import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
-import { InlineA, InlineLink, MainGrid, Separator } from "~/utils/components";
-import { LinkAsA } from "./link/[link]";
-import { ProjectSummary } from "~/utils/endpoint_view";
-import { links } from "~/utils/links";
-import { GlobBlobs } from "~/utils/blobs";
-import { use_server_projects_2 } from "~/utils/endpoint_2";
-import { useViewport } from "~/utils/inline";
+import { GlobBlobs } from "~/components/home/glob_blobs";
+import { MainGrid } from "~/components/layout/main_grid";
+import { ProjectSummary } from "~/components/project/project_card";
+import { InlineA, InlineLink } from "~/components/ui/inline_link";
+import { ProfileLink } from "~/components/ui/profile_link";
+import { Separator } from "~/components/ui/separator";
+import { useViewport } from "~/hooks/use_viewport";
+import { links } from "~/lib/profile_links";
+import { list_projects } from "~/server/db/projects";
 
 export default component$(() => {
     const aboutParagraph = {
@@ -42,12 +49,12 @@ export default component$(() => {
                         </p>
                     </div>
                     <div q:slot="call_of_action" style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                        <LinkAsA name="Resume" >
+                        <ProfileLink name="Resume">
                             View my Resume
-                        </LinkAsA>
-                        <LinkAsA name="Github">
+                        </ProfileLink>
+                        <ProfileLink name="Github">
                             View my Github
-                        </LinkAsA>
+                        </ProfileLink>
                     </div>
                 </AboutMe>
                 <Projects />
@@ -301,7 +308,7 @@ const AnimatedLine = component$(() => {
 });
 
 export const use_projects = routeLoader$(async (event) => {
-    return await use_server_projects_2(event);
+    return await list_projects(event.env);
 });
 
 const Projects = component$(() => {

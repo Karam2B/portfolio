@@ -1,3 +1,8 @@
+/**
+ * Google OAuth for the admin. After a successful exchange this page stores the
+ * JWT in localStorage and a `jwt` cookie; `~/server/auth` is what loaders check.
+ */
+
 import { component$, useSignal, useTask$, useVisibleTask$ } from "@builder.io/qwik";
 import { RequestEvent, routeLoader$, server$, useLocation } from "@builder.io/qwik-city";
 import jwt from "jsonwebtoken";

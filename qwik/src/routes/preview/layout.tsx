@@ -1,9 +1,13 @@
+/**
+ * Live (non-static) preview of blog posts and projects.
+ * This tree is excluded from static generation. There is no onStaticGenerate
+ * here, and the server adapter skips /preview/*, so each request renders now.
+ */
+
 import { Slot, component$ } from "@builder.io/qwik";
 import { type DocumentHead, type RequestHandler } from "@builder.io/qwik-city";
-import { InlineLink } from "~/utils/components";
+import { InlineLink } from "~/components/ui/inline_link";
 
-// This tree is excluded from static generation. There is no onStaticGenerate
-// here, and the server adapter skips /preview/*, so each request renders now.
 export const onRequest: RequestHandler = ({ cacheControl, headers }) => {
     cacheControl({
         noStore: true,

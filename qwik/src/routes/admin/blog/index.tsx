@@ -1,7 +1,7 @@
 import { component$ } from "@builder.io/qwik";
 import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
-import { list_blogs } from "~/utils/blog";
-import { InlineLink } from "~/utils/components";
+import { InlineLink } from "~/components/ui/inline_link";
+import { list_blogs } from "~/server/db/blogs";
 
 export const use_admin_blogs = routeLoader$(async (event) => {
     return await list_blogs(event.env, true);

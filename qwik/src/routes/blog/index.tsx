@@ -1,9 +1,10 @@
 import { component$ } from "@builder.io/qwik";
 import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
-import { DateTime } from "luxon";
-import { list_blogs } from "~/utils/blog";
-import { BlogFrame, use_local_admin_token } from "~/utils/blog_view";
-import { InlineLink } from "~/utils/components";
+import { BlogFrame } from "~/components/blog/blog_frame";
+import { InlineLink } from "~/components/ui/inline_link";
+import { use_local_admin_token } from "~/hooks/use_local_admin_token";
+import { format_date } from "~/lib/format_date";
+import { list_blogs } from "~/server/db/blogs";
 
 export const use_blogs = routeLoader$(async (event) => {
     return await list_blogs(event.env);
@@ -34,7 +35,7 @@ export default component$(() => {
                                 {post.title}
                             </InlineLink>
                             <p style={{ margin: "0.35rem 0 0", opacity: 0.7 }}>
-                                <time>{DateTime.fromISO(post.created_at).toFormat("LLL dd yyyy")}</time>
+                                <time>{format_date(post.created_at)}</time>
                             </p>
                             <p style={{ margin: "0.5rem 0 0" }}>{post.summary}</p>
                         </article>

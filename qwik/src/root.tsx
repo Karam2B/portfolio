@@ -1,9 +1,23 @@
-import { DocumentHead, QwikCityProvider, RouterOutlet } from "@builder.io/qwik-city";
-import { RouterHead } from "./utils/router_head";
-import { component$, isDev, useStylesScoped$ } from "@builder.io/qwik";
-import { Base } from "./utils/components";
-import { SANS } from "./utils/inline";
+/**
+ * App shell. Qwik City mounts this once; pages live under `src/routes`.
+ *
+ * Where to put new code:
+ *   routes/          A page, loader, or action (file-based routing). No SQL here.
+ *   components/ui/   Reusable primitives: links, buttons, form fields, images.
+ *   components/      Feature UI: blog/, project/, markdown/, layout/, home/.
+ *   hooks/           Browser-only Qwik hooks (viewport, local admin token).
+ *   lib/             Pure helpers that run on server or browser (theme, dates, slugs).
+ *   server/db/       Every SQL statement, one file per table (projects.ts, blogs.ts).
+ *   server/          Other server-only code: auth.ts, media.ts (S3). Never import
+ *                    these from components except with `import type`.
+ *   experimental/    Unused experiments. Production queries are in server/db/.
+ */
 
+import { DocumentHead, QwikCityProvider, RouterOutlet } from "@builder.io/qwik-city";
+import { component$, isDev, useStylesScoped$ } from "@builder.io/qwik";
+import { RouterHead } from "~/components/layout/router_head";
+import { Base } from "~/components/layout/base";
+import { SANS } from "~/lib/theme";
 
 export default component$(() => {
     // Flashing Colors When Opening Page:
@@ -67,5 +81,5 @@ export const head: DocumentHead = {
     ],
     links: [
         { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-    ]
-}
+    ],
+};

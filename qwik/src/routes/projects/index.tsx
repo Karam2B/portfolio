@@ -1,12 +1,13 @@
 import { component$ } from "@builder.io/qwik";
-import { InlineLink, MainGrid } from "~/utils/components";
-import { ProjectSummary } from "~/utils/endpoint_view";
 import { MoArrowLeft } from "@qwikest/icons/monoicons";
 import { routeLoader$ } from "@builder.io/qwik-city";
-import { use_server_projects_2 } from "~/utils/endpoint_2";
+import { MainGrid } from "~/components/layout/main_grid";
+import { ProjectSummary } from "~/components/project/project_card";
+import { InlineLink } from "~/components/ui/inline_link";
+import { list_projects } from "~/server/db/projects";
 
 export const use_projects = routeLoader$(async (event) => {
-    return await use_server_projects_2(event);
+    return await list_projects(event.env);
 });
 
 export default component$(() => {

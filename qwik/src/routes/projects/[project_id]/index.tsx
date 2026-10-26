@@ -1,30 +1,29 @@
 import { component$, useComputed$ } from "@builder.io/qwik";
 import { routeLoader$, StaticGenerateHandler } from "@builder.io/qwik-city";
-import { DisplayImage, InlineA } from "~/utils/components";
 import { MoChevronRight } from "@qwikest/icons/monoicons";
 import Github from "~/../public/github.svg?jsx";
 import Live from "~/../public/live.svg?jsx";
-import { DateTime } from "luxon";
-import { one_project_2, all_projects_ids } from "~/utils/endpoint_2";
-import { get_marked_engine, Marked } from "~/utils/marked_down";
+import { lex_markdown } from "~/components/markdown/engine";
+import { Marked } from "~/components/markdown/marked";
+import { DisplayImage } from "~/components/ui/display_image";
+import { InlineA } from "~/components/ui/inline_link";
+import { format_date } from "~/lib/format_date";
+import { list_projects, one_project } from "~/server/db/projects";
 
 export const use_project = routeLoader$(async (event) => {
-    let s = await one_project_2(event, event.params.project_id);
+    const s = await one_project(event.env, event.params.project_id);
     if (s.found === "none") {
         event.status(404);
     }
-    return s
-})
+    return s;
+});
 
 export default component$(() => {
     let project = use_project();
-    let parse_content = useComputed$(() => {
-        let m = get_marked_engine();
-        let og = "";
-        if (project.value.value) og = project.value.value.content;
-
-        return m.lexer(og.replace(/\\n/g, "\n"));
-    })
+    const parse_content = useComputed$(() => {
+        const og = project.value.value ? project.value.value.content : "";
+        return lex_markdown(og);
+    });
 
     if (project.value.found === "none") {
         return <div style={{ width: "min(800px, 95vw)", margin: "0 auto" }}>
@@ -56,7 +55,7 @@ export default component$(() => {
         <p style={{ margin: 0, opacity: 0.7 }}>
             created at{" "}
             <time>
-                {DateTime.fromISO(project.value.value.created_at).toFormat("LLL dd yyyy")}
+                {format_date(project.value.value.created_at)}
             </time>
         </p>
 
@@ -93,10 +92,7 @@ export default component$(() => {
 
 
 export const onStaticGenerate: StaticGenerateHandler = async function ({ env }) {
-    let params = await all_projects_ids(env)
-    return { params: params.map((e) => ({ project_id: e.snake_case_id })) }
-}
-function sanitizeHtml(arg0: any, arg1: { allowedTags: string[]; allowedAttributes: { a: string[]; img: string[]; }; }): string {
-    throw new Error("Function not implemented.");
-}
+    const projects = await list_projects(env);
+    return { params: projects.map((project) => ({ project_id: project.snake_case_id })) };
+};
 
