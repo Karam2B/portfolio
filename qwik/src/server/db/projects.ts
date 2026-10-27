@@ -46,6 +46,16 @@ const project_schema = v.object({
     skills: v.string(),
 });
 
+/** libSQL row → project_schema. Missing `published` is an old table and counts as published. */
+function from_sql_row(row: Record<string, unknown>, with_content: boolean) {
+    return {
+        ...row,
+        published: row.published == null ? true : sqlite_bool(row.published),
+        skills: row.skills ?? "",
+        ...(with_content ? { content: row.content ?? "" } : {}),
+    };
+}
+
 /** List views skip the markdown body. */
 const project_summary_schema = v.omit(project_schema, ["content"]);
 
@@ -86,60 +96,11 @@ function normalize_skills(raw: string): string {
 // Reads
 // ---------------------------------------------------------------------------
 
-/** Every column except `content` and `published`, which each query adds as needed. */
+/** Shared select list. `COALESCE` is the only alias — `updated_at` can still be NULL on old rows. */
 const project_columns = `
-            p.id AS p_id,
-            p.snake_case_id AS p_snake_case_id,
-            p.title AS p_title,
-            p.summary AS p_summary,
-            p.github_link AS p_github_link,
-            p.display_on_home AS p_display_on_home,
-            p.live_link AS p_live_link,
-            p.created_at AS p_created_at,
-            COALESCE(p.updated_at, p.created_at) AS p_updated_at,
-            p.display_picture AS p_display_picture,
-            p.skills AS p_skills
+    id, snake_case_id, title, summary, github_link, display_on_home, live_link,
+    created_at, COALESCE(updated_at, created_at) AS updated_at, display_picture, skills
 `;
-
-/** Raw row shape produced by `project_columns`. */
-const project_row_schema = v.object({
-    p_id: v.number(),
-    p_snake_case_id: v.string(),
-    p_title: v.string(),
-    p_summary: v.string(),
-    p_github_link: v.nullable(v.string()),
-    p_live_link: v.nullable(v.string()),
-    p_display_on_home: v.pipe(v.any(), v.transform((e) => Boolean(e)), v.boolean()),
-    p_created_at: v.string(),
-    p_updated_at: v.string(),
-    p_content: v.nullish(v.string()),
-    p_display_picture: v.nullable(v.string()),
-    p_published: v.nullish(v.any()),
-    p_skills: v.nullish(v.string()),
-});
-
-/** A row without `p_published` came from the fallback query and counts as published. */
-function map_project_row(row: v.InferOutput<typeof project_row_schema>, with_content: boolean) {
-    const published = row.p_published == null ? true : sqlite_bool(row.p_published);
-    const base = {
-        id: row.p_id,
-        snake_case_id: row.p_snake_case_id,
-        title: row.p_title,
-        summary: row.p_summary,
-        github_link: row.p_github_link,
-        display_on_home: row.p_display_on_home,
-        live_link: row.p_live_link,
-        created_at: row.p_created_at,
-        updated_at: row.p_updated_at,
-        display_picture: row.p_display_picture,
-        published,
-        skills: row.p_skills ?? "",
-    };
-    if (with_content) {
-        return { ...base, content: row.p_content ?? "" };
-    }
-    return base;
-}
 
 function project_read_client(env: EnvGetter) {
     const client = read_client(env);
@@ -156,20 +117,18 @@ export async function list_projects(env: EnvGetter, admin = false): Promise<Proj
     const fetched = await execute_with_published_fallback(
         client,
         `
-        SELECT ${project_columns},
-            p.published AS p_published
-        FROM Project p
-        ${admin ? "" : "WHERE p.published = 1"};
+        SELECT ${project_columns}, published
+        FROM Project
+        ${admin ? "" : "WHERE published = 1"};
         `,
         `
         SELECT ${project_columns}
-        FROM Project p;
+        FROM Project;
         `,
     );
 
-    const rows = parse_rows(v.array(project_row_schema), fetched.rows);
     console.log("fetched project with count: ", fetched.rows.length);
-    return parse_rows(v.array(project_summary_schema), rows.map((row) => map_project_row(row, false)));
+    return parse_rows(v.array(project_summary_schema), fetched.rows.map((row) => from_sql_row(row, false)));
 }
 
 /**
@@ -181,41 +140,37 @@ export async function one_project(env: EnvGetter, key: string, admin = false) {
     if (!key) return { found: "none" as const };
 
     const by_id = admin && /^\d+$/.test(key);
-    const key_column = by_id ? "p.id" : "p.snake_case_id";
+    const key_column = by_id ? "id" : "snake_case_id";
     const args = [by_id ? Number(key) : key];
-    const columns = `${project_columns},
-            p.content AS p_content
-    `;
 
     const fetched = await execute_with_published_fallback(
         client,
         {
             sql: `
-        SELECT ${columns},
-            p.published AS p_published
-        FROM Project p
-        ${admin ? `WHERE ${key_column} = ?` : `WHERE p.published = 1 AND ${key_column} = ?`};
+        SELECT ${project_columns}, content, published
+        FROM Project
+        ${admin ? `WHERE ${key_column} = ?` : `WHERE published = 1 AND ${key_column} = ?`};
         `,
             args,
         },
         {
             sql: `
-        SELECT ${columns}
-        FROM Project p
+        SELECT ${project_columns}, content
+        FROM Project
         WHERE ${key_column} = ?;
         `,
             args,
         },
     );
 
-    const rows = parse_rows(v.array(project_row_schema), fetched.rows);
+    const rows = parse_rows(v.array(project_schema), fetched.rows.map((row) => from_sql_row(row, true)));
     if (rows.length === 0) {
         return { found: "none" as const };
     }
     if (rows.length > 1) {
         throw new Error("bug: id didn't work as unique, len" + rows.length);
     }
-    return { found: "some" as const, value: parse_rows(project_schema, map_project_row(rows[0], true)) };
+    return { found: "some" as const, value: rows[0] };
 }
 
 // ---------------------------------------------------------------------------

@@ -3,7 +3,7 @@
  * this route. Reusable cards and blobs live under `~/components`.
  */
 
-import { $, Slot, component$, useOnWindow, useSignal, useStylesScoped$, useVisibleTask$ } from "@builder.io/qwik";
+import { Slot, component$, useSignal, useStylesScoped$ } from "@builder.io/qwik";
 import ScrollIcon from "~/../public/scroll.svg?jsx";
 import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
 import { GlobBlobs } from "~/components/home/glob_blobs";
@@ -112,71 +112,69 @@ const IndexStructure = component$(() => {
 
 const Scroll = component$(() => {
     const hide = useSignal(false);
-    const offset = useSignal(0);
 
     // Flashing Colors When Opening Page:
     // Icon fill/stroke used to wait for usePrefersDark.
+    // Bounce is CSS so it does not depend on a visible-task timer resuming.
     useStylesScoped$(`
-        .icon {
+        .mouse {
+            position: fixed;
+            bottom: 40px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 4;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .mouse.hide {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        .mouse :global(svg) {
             width: 40px;
             height: 40px;
-            transition: opacity 0.2s ease;
+            display: block;
+            animation: bounce 1.2s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .mouse :global(svg) { animation: none; }
         }
         @media (prefers-color-scheme: light) {
-            .icon {
+            .mouse :global(svg) {
                 fill: #000000;
                 stroke: #000000;
             }
         }
         @media (prefers-color-scheme: dark) {
-            .icon {
+            .mouse :global(svg) {
                 fill: #ffffff;
                 stroke: #ffffff;
             }
         }
-        .force_scheme_to_light .icon {
+        .force_scheme_to_light .mouse :global(svg) {
             fill: #000000;
             stroke: #000000;
         }
-        .force_scheme_to_dark .icon {
+        .force_scheme_to_dark .mouse :global(svg) {
             fill: #ffffff;
             stroke: #ffffff;
         }
     `);
 
-    useOnWindow(
-        "scroll",
-        $(() => {
-            hide.value = window.document.documentElement.scrollTop !== 0;
-        }),
-    );
-
-    useVisibleTask$(({ cleanup }) => {
-        const id = window.setInterval(() => {
-            offset.value = Math.sin(Date.now() / 160) * -10;
-        }, 50);
-        cleanup(() => window.clearInterval(id));
-    });
-
     return (
         <div
-            style={{
-                position: "fixed",
-                bottom: 40,
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                paddingTop: 30,
-                zIndex: 4,
+            class={hide.value ? "mouse hide" : "mouse"}
+            window:onScroll$={() => {
+                hide.value = (window.scrollY || document.documentElement.scrollTop) > 0;
             }}
         >
-            <ScrollIcon
-                class="icon"
-                style={{
-                    opacity: hide.value ? 0 : 1,
-                    transform: hide.value ? "translateY(15px)" : `translateY(${offset.value}px)`,
-                }}
-            />
+            <ScrollIcon />
         </div>
     );
 });
