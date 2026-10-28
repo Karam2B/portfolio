@@ -1,5 +1,5 @@
 /**
- * Project card used on the home page, `/projects`, and `/preview/project`.
+ * Project card used on the home page, `/projects`, and `/admin/preview/projects`.
  * Pass `href` to point the card somewhere other than `/projects/:slug`.
  *
  * `ProjectSummary` is a type-only import from the table module, so the SQL

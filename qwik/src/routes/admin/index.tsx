@@ -10,6 +10,7 @@ export default component$(() => {
             <InlineLink href="/admin/projects/new">New project</InlineLink>
             <InlineLink href="/admin/projects">Edit projects</InlineLink>
             <InlineLink href="/admin/photos">Photos</InlineLink>
+            <InlineLink href="/admin/preview">Preview unpublished</InlineLink>
             <InlineA href="https://vercel.com/karam-barakats-projects/portfolio" target="_blank">Vercel Deploy</InlineA>
         </div>
     );

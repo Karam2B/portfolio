@@ -13,8 +13,8 @@ export default extendConfig(baseConfig, () => {
     plugins: [
       staticAdapter({
         origin: "https://yoursite.qwik.dev",
-        // /preview is rendered on each request by the server build, not as HTML files.
-        exclude: ["/preview/*"],
+        // /admin/preview is rendered on each request by the server build, not as HTML files.
+        exclude: ["/admin/preview/*"],
       }),
     ],
   };

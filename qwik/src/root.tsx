@@ -5,7 +5,7 @@
  *   routes/          A page, loader, or action (file-based routing). No SQL here.
  *   components/ui/   Reusable primitives: links, buttons, form fields, images.
  *   components/      Feature UI: blog/, project/, markdown/, layout/, home/.
- *   hooks/           Browser-only Qwik hooks (viewport, local admin token).
+ *   hooks/           Browser-only Qwik hooks (local admin token).
  *   lib/             Pure helpers that run on server or browser (theme, dates, slugs).
  *   server/db/       Every SQL statement, one file per table (projects.ts, blogs.ts).
  *   server/          Other server-only code: auth.ts, media.ts (S3). Never import

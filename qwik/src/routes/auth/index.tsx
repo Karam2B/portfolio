@@ -112,7 +112,7 @@ export default component$(() => {
     });
     return <div style={{ width: "min(500px, 90vw)", margin: "0 auto", paddingTop: "2.5rem" }} >
         <p style={{ margin: 0 }}>
-            Hi there, I'm interested how you knew this route exists. Anyway, only authorized users have access, tell me how are you:
+            Hi there, only authorized users have access, tell me how are you:
         </p>
         <div style={{ display: "flex", flexDirection: "column" }}>
             <a href={

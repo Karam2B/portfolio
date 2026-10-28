@@ -3,10 +3,11 @@
  *
  * Flashing Colors When Opening Page:
  * Theme colors belong in useStylesScoped$ under `prefers-color-scheme`, plus the
- * `.force_scheme_to_light` / `.force_scheme_to_dark` overrides. CSS applies them
- * on first paint, while JS (matchMedia / usePrefersDark) only runs after
- * hydration and makes the page flash the wrong colors. Do not reintroduce JS
- * checks for paint-time colors.
+ * `.force_scheme_to_light` / `.force_scheme_to_dark` overrides. Column counts,
+ * margins, and other breakpoints belong in `@media` too. CSS applies them on
+ * first paint, while JS (matchMedia / useViewport) only runs after hydration
+ * and makes the page flash the wrong layout. Do not reintroduce JS checks for
+ * paint-time colors or layout.
  */
 
 export const SANS =

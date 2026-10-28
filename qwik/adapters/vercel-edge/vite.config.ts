@@ -15,8 +15,8 @@ export default extendConfig(baseConfig, () => {
       vercelEdgeAdapter({
         ssg: {
           include: ["/", "/*"],
-          // Leave /preview for the edge function. Every other route is still an HTML file.
-          exclude: ["/preview/*"],
+          // Leave /admin/preview for the edge function. Every other route is still an HTML file.
+          exclude: ["/admin/preview/*"],
         },
       }),
     ],

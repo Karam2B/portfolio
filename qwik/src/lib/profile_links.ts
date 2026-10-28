@@ -3,7 +3,8 @@
  *
  * - `text` doubles as the link's id: `<ProfileLink name="Github">` and the
  *   short URL `/link/github` (see routes/link/[link].tsx) both look links up by it.
- * - Entries with an `Img` icon also appear in the home page's contact section.
+ * - Entries with an `Img` icon appear in `<ContactMe>` (home page and `/link`).
+ * - An unknown `/link/:slug` redirects to `/link`, which uses the same icons.
  */
 
 import { BsLinkedin, BsGithub } from "@qwikest/icons/bootstrap";

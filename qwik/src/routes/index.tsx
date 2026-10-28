@@ -6,14 +6,13 @@
 import { Slot, component$, useSignal, useStylesScoped$ } from "@builder.io/qwik";
 import ScrollIcon from "~/../public/scroll.svg?jsx";
 import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
+import { ContactMe } from "~/components/home/contact_me";
 import { GlobBlobs } from "~/components/home/glob_blobs";
 import { MainGrid } from "~/components/layout/main_grid";
 import { ProjectSummary } from "~/components/project/project_card";
 import { InlineA, InlineLink } from "~/components/ui/inline_link";
 import { ProfileLink } from "~/components/ui/profile_link";
 import { Separator } from "~/components/ui/separator";
-import { useViewport } from "~/hooks/use_viewport";
-import { links } from "~/lib/profile_links";
 import { list_projects } from "~/server/db/projects";
 
 export default component$(() => {
@@ -58,11 +57,10 @@ export default component$(() => {
                     </div>
                 </AboutMe>
                 <Projects />
-                <ContactMe >
-                    <span q:slot="message" >
-                        I'm currently looking for jobs, you can say hi any time
-                    </span>
-                </ContactMe>
+                <ContactMe
+                    title="Get in Contact"
+                    message="I'm currently looking for jobs, you can say hi any time"
+                />
             </div>
             <div q:slot="footer">
                 Built with with love by Karam | checkout the code on{" "}
@@ -89,7 +87,7 @@ const IndexStructure = component$(() => {
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <div style={{ flex: 1 }}>
                 {/* Hero text lives inside GlobBlobs canvas so backdrop-filter glass can blur it. */}
-                <div style={{ position: "relative", height: "100svh", overflow: "hidden" }}>
+                <div style={{ position: "relative", height: "100svh", overflowX: "hidden", overflowY: "visible" }}>
                     <GlobBlobs parallax>
                         <Slot name="hero" />
                     </GlobBlobs>
@@ -202,20 +200,27 @@ const Intro = component$(() => {
 });
 
 const AboutMe = component$(() => {
-    const viewport = useViewport();
-    const short = viewport.value.height <= 700;
+    useStylesScoped$(`
+        .about {
+            margin-top: -30vh;
+        }
+        @media (max-height: 700px) {
+            .about {
+                margin-top: 200px;
+            }
+        }
+        .copy {
+            max-width: 95vw;
+            margin: 0 auto;
+            display: grid;
+            justify-items: center;
+            text-align: center;
+        }
+    `);
     return (
-        <div style={{ marginTop: short ? 200 : "-30vh" }}>
+        <div class="about">
             <AnimatedLine>
-                <div
-                    style={{
-                        maxWidth: "95vw",
-                        margin: "0 auto",
-                        display: "grid",
-                        justifyItems: "center",
-                        textAlign: "center",
-                    }}
-                >
+                <div class="copy">
                     <div>
                         <Slot name="main" />
                         <Slot name="call_of_action" />
@@ -227,13 +232,37 @@ const AboutMe = component$(() => {
 });
 
 const AnimatedLine = component$(() => {
-    const viewport = useViewport();
     const draw = useSignal(0);
-    const narrow = viewport.value.width <= 1280;
 
     // Flashing Colors When Opening Page:
     // Path stroke used to flip after matchMedia.
     useStylesScoped$(`
+        .line {
+            display: flex;
+            justify-content: center;
+            transform: translateY(-144px);
+            overflow: hidden;
+        }
+        .overlay {
+            position: absolute;
+            width: 1200px;
+            display: grid;
+            height: 0;
+            place-content: center;
+            align-items: center;
+            top: 38%;
+        }
+        @media (max-width: 1280px) {
+            .overlay {
+                width: 95vw;
+                margin: 2.5vw;
+                left: 0;
+            }
+        }
+        .overlay-inner {
+            isolation: isolate;
+            z-index: 10;
+        }
         .draw-path {
             fill-opacity: 0;
             stroke-width: 2;
@@ -250,14 +279,7 @@ const AnimatedLine = component$(() => {
     `);
 
     return (
-        <div
-            style={{
-                display: "flex",
-                justifyContent: "center",
-                transform: "translateY(-144px)",
-                overflow: "hidden",
-            }}
-        >
+        <div class="line">
             <div>
                 <svg
                     window:onScroll$={(_, target) => {
@@ -284,19 +306,8 @@ const AnimatedLine = component$(() => {
                         }}
                     />
                 </svg>
-                <div
-                    style={{
-                        position: "absolute",
-                        width: narrow ? "95vw" : 1200,
-                        display: "grid",
-                        height: 0,
-                        placeContent: "center",
-                        alignItems: "center",
-                        top: "38%",
-                        ...(narrow ? { margin: "2.5vw", left: 0 } : {}),
-                    }}
-                >
-                    <div style={{ isolation: "isolate", zIndex: 10 }}>
+                <div class="overlay">
+                    <div class="overlay-inner">
                         <Slot />
                     </div>
                 </div>
@@ -341,49 +352,3 @@ const Projects = component$(() => {
     );
 });
 
-const ContactMe = component$(() => {
-    return (
-        <div>
-            <div
-                style={{
-                    height: "calc(100vh - 90px)",
-                    display: "grid",
-                    placeContent: "center",
-                }}
-            >
-                <h2 style={{ textAlign: "center", fontSize: "3rem", lineHeight: 1, fontWeight: 400, margin: "0 0 0.5rem" }}>
-                    Get in Contact
-                </h2>
-                <p style={{ textAlign: "center", fontSize: "1.5rem", lineHeight: "2rem", fontWeight: 100, margin: 0 }}>
-                    <Slot name="message" />
-                </p>
-                <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginTop: "1rem" }}>
-                    {links.map((item) => {
-                        if (!item.Img) return;
-                        return (
-                            <a
-                                href={item.href}
-                                target="_blank"
-                                key={item.text}
-                                style={{
-                                    cursor: "pointer",
-                                    color: "#3b82f6",
-                                    fontSize: 32,
-                                    lineHeight: 1,
-                                    textDecoration: "none",
-                                    display: "inline-flex",
-                                }}
-                            >
-                                <item.Img
-                                    //@ts-ignore
-                                    alt={item.text}
-                                    style={{ width: 32, height: 32, fill: "currentColor" }}
-                                />
-                            </a>
-                        );
-                    })}
-                </div>
-            </div>
-        </div>
-    );
-});

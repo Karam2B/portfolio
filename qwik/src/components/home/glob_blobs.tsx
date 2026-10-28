@@ -22,7 +22,7 @@ export const GlobBlobs = component$((props: { parallax?: boolean }) => {
         }
         .stage {
             width: 100%;
-            overflow: hidden;
+            overflow: visible;
             display: flex;
             align-items: center;
             justify-content: center;

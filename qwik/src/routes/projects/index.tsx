@@ -1,9 +1,6 @@
 import { component$ } from "@builder.io/qwik";
-import { MoArrowLeft } from "@qwikest/icons/monoicons";
 import { routeLoader$ } from "@builder.io/qwik-city";
-import { MainGrid } from "~/components/layout/main_grid";
-import { ProjectSummary } from "~/components/project/project_card";
-import { InlineLink } from "~/components/ui/inline_link";
+import { ProjectList } from "~/components/project/project_list";
 import { list_projects } from "~/server/db/projects";
 
 export const use_projects = routeLoader$(async (event) => {
@@ -12,21 +9,5 @@ export const use_projects = routeLoader$(async (event) => {
 
 export default component$(() => {
     const projects = use_projects();
-    return (
-        <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "min(800px, 90vw)", margin: "0 auto", padding: "1.75rem 0", fontSize: "1.875rem", lineHeight: "2.25rem" }}>
-                <InlineLink href="/">
-                    <MoArrowLeft />
-                </InlineLink>
-                <InlineLink href="/">
-                    <span>Go Home</span>
-                </InlineLink>
-            </div>
-            <MainGrid>
-                {projects.value.map((p) => {
-                    return <ProjectSummary key={p.id} data={p} />;
-                })}
-            </MainGrid>
-        </div>
-    );
+    return <ProjectList projects={projects.value} home_href="/" item_base="/projects" />;
 });

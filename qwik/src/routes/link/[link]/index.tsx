@@ -1,6 +1,7 @@
 /**
  * Short URLs for the entries in `~/lib/profile_links`.
  * `/link/github` looks up the link whose `text` snake-cases to `github`.
+ * Unknown slugs redirect to `/link`, which shows the contact section.
  */
 
 import { RequestEvent } from "@builder.io/qwik-city";
@@ -17,4 +18,3 @@ export const onGet = async ({ redirect, params }: RequestEvent) => {
 
     throw redirect(302, found.href);
 };
-
