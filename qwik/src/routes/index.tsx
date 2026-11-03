@@ -63,7 +63,7 @@ export default component$(() => {
                 />
             </div>
             <div q:slot="footer">
-                Built with with love by Karam | checkout the code on{" "}
+                Full-stack website built with with love by Karam | checkout the code on{" "}
                 <InlineA href="https://github.com/Karam2B/portfolio">
                     Github
                 </InlineA>

@@ -17,6 +17,20 @@ terraform {
 }
 
 // general variables
+variable "main_email" {
+  sensitive   = true
+  description = "Main email address"
+  type        = string
+  nullable    = false
+}
+
+variable "secondary_email" {
+  sensitive   = true
+  description = "Secondary email address"
+  type        = string
+  nullable    = false
+}
+
 variable "admin_jwt_secret" {
   description = ""
   type        = string
@@ -26,24 +40,37 @@ variable "admin_jwt_secret" {
 
 // Provider: Google
 variable "admin_google_oauth_client_id" {
-  description = ""
+  description = "Used for Google OAuth, I don't think there is a terraform way to manage this, so I will add it manually and store it as a variable"
   type        = string
   nullable    = false
 }
 
 variable "admin_google_oauth_client_secret" {
-  description = ""
+  description = "Used for Google OAuth, I don't think there is a terraform way to manage this, so I will add it manually and store it as a variable"
   type        = string
   nullable    = false
   sensitive   = true
 }
 
-
-
-
 // Provider: AWS
 provider "aws" {
-  region = "us-west-2"
+  region     = "us-west-2"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+}
+
+variable "aws_access_key" {
+  description = "AWS access key"
+  type        = string
+  nullable    = false
+  sensitive   = true
+}
+
+variable "aws_secret_key" {
+  description = "AWS secret key"
+  type        = string
+  nullable    = false
+  sensitive   = true
 }
 
 resource "aws_s3_bucket" "main_s3" {
@@ -172,6 +199,7 @@ data "vercel_project" "frontend" {
 }
 
 resource "vercel_project_environment_variable" "turso_database_url" {
+  sensitive  = true
   project_id = data.vercel_project.frontend.id
   key        = "TURSO_DATABASE_URL"
   value      = var.turso_database_url
@@ -179,6 +207,7 @@ resource "vercel_project_environment_variable" "turso_database_url" {
 }
 
 resource "vercel_project_environment_variable" "turso_auth_token" {
+  sensitive  = true
   project_id = data.vercel_project.frontend.id
   key        = "TURSO_AUTH_TOKEN_READ_ONLY"
   value      = var.turso_token_read_only
@@ -186,6 +215,7 @@ resource "vercel_project_environment_variable" "turso_auth_token" {
 }
 
 resource "vercel_project_environment_variable" "turso_auth_token_full_access" {
+  sensitive  = true
   project_id = data.vercel_project.frontend.id
   key        = "TURSO_AUTH_TOKEN_FULL_ACCESS"
   value      = var.turso_token_full_access
@@ -193,6 +223,7 @@ resource "vercel_project_environment_variable" "turso_auth_token_full_access" {
 }
 
 resource "vercel_project_environment_variable" "media_bucket_domain" {
+  sensitive  = false
   project_id = data.vercel_project.frontend.id
   key        = "PUBLIC_MEDIA_BUCKET_DOMAIN"
   value      = "https://${aws_s3_bucket.main_s3.bucket_domain_name}" # This will likely be a new token created for the project.
@@ -200,6 +231,7 @@ resource "vercel_project_environment_variable" "media_bucket_domain" {
 }
 
 resource "vercel_project_environment_variable" "google_oauth_client_id" {
+  sensitive  = false
   project_id = data.vercel_project.frontend.id
   key        = "PUBLIC_GOOGLE_OAUTH_CLIENT_ID"
   value      = var.admin_google_oauth_client_id
@@ -207,6 +239,7 @@ resource "vercel_project_environment_variable" "google_oauth_client_id" {
 }
 
 resource "vercel_project_environment_variable" "google_oauth_client_secret" {
+  sensitive  = true
   project_id = data.vercel_project.frontend.id
   key        = "GOOGLE_OAUTH_CLIENT_SECRET"
   value      = var.admin_google_oauth_client_secret
@@ -214,6 +247,7 @@ resource "vercel_project_environment_variable" "google_oauth_client_secret" {
 }
 
 resource "vercel_project_environment_variable" "jwt_secret" {
+  sensitive  = true
   project_id = data.vercel_project.frontend.id
   key        = "JWT_SECRET"
   value      = var.admin_jwt_secret
@@ -221,6 +255,7 @@ resource "vercel_project_environment_variable" "jwt_secret" {
 }
 
 resource "vercel_project_environment_variable" "aws_access_key_id" {
+  sensitive  = true
   project_id = data.vercel_project.frontend.id
   key        = "AWS_ACCESS_KEY_ID"
   value      = aws_iam_access_key.media_uploader.id
@@ -228,6 +263,7 @@ resource "vercel_project_environment_variable" "aws_access_key_id" {
 }
 
 resource "vercel_project_environment_variable" "aws_secret_access_key" {
+  sensitive  = true
   project_id = data.vercel_project.frontend.id
   key        = "AWS_SECRET_ACCESS_KEY"
   value      = aws_iam_access_key.media_uploader.secret
@@ -235,6 +271,7 @@ resource "vercel_project_environment_variable" "aws_secret_access_key" {
 }
 
 resource "vercel_project_environment_variable" "aws_region" {
+  sensitive  = false
   project_id = data.vercel_project.frontend.id
   key        = "AWS_REGION"
   value      = "us-west-2"
@@ -242,15 +279,25 @@ resource "vercel_project_environment_variable" "aws_region" {
 }
 
 resource "vercel_project_environment_variable" "aws_s3_bucket" {
+  sensitive  = false
   project_id = data.vercel_project.frontend.id
   key        = "AWS_S3_BUCKET"
   value      = aws_s3_bucket.main_s3.bucket
   target     = ["production", "preview", "development"]
 }
 
-# public information, that I might use as a hint on how to regenerate terraform.tfstate successfully
+resource "vercel_project_environment_variable" "oauth_email" {
+  sensitive  = true
+  project_id = data.vercel_project.frontend.id
+  key        = "OAUTH_EMAIL"
+  value      = var.secondary_email
+  target     = ["production", "preview", "development"]
+}
+
+# public information
 output "gcp_main_email" {
-  value = "k99.barakat@gmail.com"
+  value     = var.main_email
+  sensitive = true
 }
 
 output "gcp_project_name" {
@@ -266,11 +313,13 @@ output "vercel_frontend_team_id" {
 }
 
 output "vercel_main_email" {
-  value = "k99.barakat@gmail.com"
+  value     = var.main_email
+  sensitive = true
 }
 
 output "turso_main_email" {
-  value = "k99.barakat@gmail.com"
+  value     = var.main_email
+  sensitive = true
 }
 
 output "turso_db" {
@@ -278,13 +327,10 @@ output "turso_db" {
 }
 
 output "aws_main_email" {
-  value = "k99.barakat@gmail.com"
+  value     = var.main_email
+  sensitive = true
 }
 
 output "aws_s3_bucket_arn" {
   value = aws_s3_bucket.main_s3.arn
-}
-
-output "aws_media_uploader_access_key_id" {
-  value = aws_iam_access_key.media_uploader.id
 }

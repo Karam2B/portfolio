@@ -1,9 +1,28 @@
 /**
  * Maps markdown `:::name` directives to Qwik components.
- * Add a new block here, then authors can write `:::your_name` in a post.
+ * Add a new block here and an entry in `custom_block_examples`, then authors
+ * can write `:::your_name` in a post. `/admin/markdown` renders that list.
  */
 
 import { Slot, component$, useSignal } from "@builder.io/qwik";
+
+/** One row on `/admin/markdown`: the directive name and a copy-paste example. */
+export const custom_block_examples: { name: string; hint: string; example: string }[] = [
+    {
+        name: "note",
+        hint: 'Optional title: :::note{title="Heads up"}',
+        example: `:::note{title="Heads up"}
+This callout can hold **markdown**, like a reminder next to a post.
+:::`,
+    },
+    {
+        name: "lighthouse_report",
+        hint: "No attributes. Embeds `/lighthouse.html`.",
+        example: `:::lighthouse_report
+:::`,
+    },
+];
+
 
 export const Note = component$((props: { title?: string }) => {
     return (

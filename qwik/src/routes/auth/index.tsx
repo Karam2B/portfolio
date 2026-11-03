@@ -9,6 +9,10 @@ import jwt from "jsonwebtoken";
 import { decode } from "js-base64";
 
 export const oauth_code = routeLoader$(async (event) => {
+    let oauth_email = event.env.get("OAUTH_EMAIL");
+    if (!oauth_email || typeof oauth_email !== "string") {
+        return { state: "bug", dev_message: "oauth email not found" } as const
+    }
     let jwt_secret = event.env.get("JWT_SECRET");
     if (!jwt_secret || typeof jwt_secret !== "string") {
         return { state: "bug", dev_message: "jwt secret not found" } as const
@@ -62,8 +66,8 @@ export const oauth_code = routeLoader$(async (event) => {
         return { state: "bug", dev_message: "accessing userinfo failed" } as const
     }
 
-    // I'm the only user of my portfolio, leaving my email hardcoded here is fine and is what I want.
-    if (user_info_json.email !== "k99.barakat@gmail.com") {
+    // I'm the only admin of my portfolio, simple comparison like this is fine and is what I want.
+    if (user_info_json.email !== oauth_email) {
         return { state: "catchable_error", frontend_message: "you are not authorized" } as const
     }
 

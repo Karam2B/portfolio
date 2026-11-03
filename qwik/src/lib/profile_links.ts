@@ -19,7 +19,7 @@ export const links = [
     },
     {
         text: "Resume" as const,
-        href: "https://docs.google.com/document/d/1IYj2S0_3rv02Aj3KAv2p5dP-4r0lke9MxIVg1ETMtIM",
+        href: "/resume",
     },
     {
         text: "Github" as const,
